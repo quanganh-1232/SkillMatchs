@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SkillMatch.Models
 {
@@ -6,23 +7,25 @@ namespace SkillMatch.Models
     {
         [Key]
         public int Id { get; set; }
-
-        [Required(ErrorMessage = "Tiêu đề không được để trống")]
+        [Required, MaxLength(200)]
         public string Title { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Mô tả công việc không được để trống")]
+        [Required]
         public string Description { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Vui lòng nhập ngân sách")]
-        [Range(10000, 100000000, ErrorMessage = "Ngân sách từ 10k đến 100 triệu")]
+        [Required]
         public decimal Budget { get; set; }
-
-        [Required(ErrorMessage = "Vui lòng chọn hạn chót")]
+        [Required]
         public DateTime Deadline { get; set; }
 
-        public string Status { get; set; } = "Open"; // Open, Processing, Completed, Cancelled
+        // Open (Đang tuyển), Processing (Đang làm), Completed (Hoàn thành), Cancelled (Hủy)
+        public string Status { get; set; } = "Open";
 
-        public int ClientId { get; set; } // ID của Khách hàng đăng tin
+        public int ClientId { get; set; }
+        public int CategoryId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        [ForeignKey("ClientId")]
+        public virtual User? Client { get; set; }
+        [ForeignKey("CategoryId")]
+        public virtual Category? Category { get; set; }
     }
 }
