@@ -11,10 +11,10 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3 py-2">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-bold text-primary fs-4" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-lightning-charge-fill"></i> SkillMatch
+        <nav class="navbar navbar-expand-lg navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-4 py-2.5">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand fw-bold text-primary fs-4 d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-lightning-charge-fill me-1"></i> SkillMatch
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -22,22 +22,28 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 
-                    <ul class="navbar-nav flex-grow-1 align-items-center">
+                    <ul class="navbar-nav flex-grow-1 align-items-center gap-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark fw-semibold me-2" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                            <a class="nav-link text-dark fw-semibold px-3 rounded-pill hover-effect" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-1"></i> Trang chủ
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark fw-semibold me-2" asp-area="" asp-controller="Jobs" asp-action="Index"><i class="bi bi-briefcase"></i> Việc làm SkillMatch</a>
+                            <a class="nav-link text-dark fw-semibold px-3 rounded-pill hover-effect" asp-area="" asp-controller="Jobs" asp-action="Index">
+                                <i class="bi bi-briefcase me-1"></i> Việc làm SkillMatch
+                            </a>
                         </li>
 
                         @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Student"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-primary fw-semibold me-2" asp-controller="Student" asp-action="Index"><i class="bi bi-person-badge"></i> Hồ sơ của tôi</a>
+                                <a class="nav-link text-primary fw-semibold px-3 rounded-pill hover-primary-effect" asp-controller="Student" asp-action="Index">
+                                    <i class="bi bi-person-badge me-1"></i> Hồ sơ của tôi
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-primary fw-semibold me-2" asp-controller="Student" asp-action="MyApplications">
-                                    <i class="bi bi-send-check"></i> Việc đã ứng tuyển
+                                <a class="nav-link text-primary fw-semibold px-3 rounded-pill hover-primary-effect" asp-controller="Student" asp-action="MyApplications">
+                                    <i class="bi bi-send-check me-1"></i> Việc đã ứng tuyển
                                 </a>
                             </li>
                         }
@@ -45,40 +51,47 @@
                         @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Client"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-success fw-semibold me-2" asp-controller="Jobs" asp-action="Create"><i class="bi bi-plus-circle"></i> Đăng việc mới</a>
+                                <a class="nav-link text-success fw-semibold px-3 rounded-pill hover-success-effect" asp-controller="Jobs" asp-action="Create">
+                                    <i class="bi bi-plus-circle me-1"></i> Đăng việc mới
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-success fw-semibold me-2" asp-controller="Jobs" asp-action="Index"><i class="bi bi-kanban"></i> Quản lý dự án</a>
+                                <a class="nav-link text-success fw-semibold px-3 rounded-pill hover-success-effect" asp-controller="Jobs" asp-action="Manage">
+                                    <i class="bi bi-kanban me-1"></i> Quản lý dự án
+                                </a>
                             </li>
                         }
-
-                        <li class="nav-item">
-                            <a class="nav-link text-muted small" asp-area="" asp-controller="Home" asp-action="Privacy">Chính sách</a>
-                        </li>
                     </ul>
 
-                    <ul class="navbar-nav align-items-center">
+                    <ul class="navbar-nav align-items-center gap-2">
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item d-flex align-items-center">
-                                <span class="nav-link text-dark me-3">
-                                    Chào, <span class="text-primary fw-bold">@User.Identity.Name</span>
-                                    <span class="badge @(User.IsInRole("Client") ? "bg-success" : "bg-primary") font-monospace ms-1 small">
-                                        @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                            <li class="nav-item">
+                                <span class="nav-link text-dark me-2 d-flex align-items-center">
+                                    <i class="bi bi-person-circle text-secondary me-1.5 fs-5"></i>
+                                    Chào, <span class="text-dark fw-bold ms-1">@User.Identity.Name</span>
+                                    <span class="badge @(User.IsInRole("Client") ? "bg-success" : "bg-primary") px-2.5 py-1.5 rounded-pill font-monospace ms-2" style="font-size: 11px;">
+                                        <i class="@(User.IsInRole("Client") ? "bi bi-building" : "bi bi-mortarboard-fill") me-1"></i>@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
                                     </span>
                                 </span>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link btn btn-outline-danger btn-sm px-3" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+                                <a class="btn btn-outline-danger btn-sm px-3.5 py-1.5 fw-bold rounded-pill" asp-controller="Account" asp-action="Logout">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                                </a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark fw-semibold px-3" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                                <a class="nav-link text-dark fw-semibold px-3 rounded-pill hover-effect" asp-controller="Account" asp-action="Login">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link btn btn-success btn-sm text-white px-3 fw-bold ms-2" asp-controller="Account" asp-action="Register">Đăng ký</a>
+                                <a class="btn btn-success btn-sm text-white px-4 py-1.5 fw-bold rounded-pill shadow-sm" asp-controller="Account" asp-action="Register">
+                                    Đăng ký
+                                </a>
                             </li>
                         }
                     </ul>
@@ -94,9 +107,9 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mt-5 py-3">
-        <div class="container text-center">
-            &copy; 2026 - <strong>SkillMatch Project</strong> - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Chính sách bảo mật hệ thống</a>
+    <footer class="border-top footer text-muted mt-5 py-4 bg-light">
+        <div class="container text-center text-secondary small">
+            &copy; 2026 - <strong class="text-dark">SkillMatch Project</strong> - Kết nối năng lực sinh viên thực tế
         </div>
     </footer>
 
@@ -106,3 +119,24 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<style>
+    .hover-effect:hover {
+        background-color: #f8f9fa;
+        color: #0d6efd !important;
+    }
+
+    .hover-primary-effect:hover {
+        background-color: #e7f1ff;
+        color: #0b5ed7 !important;
+    }
+
+    .hover-success-effect:hover {
+        background-color: #e8f5e9;
+        color: #157347 !important;
+    }
+
+    .navbar-nav .nav-link {
+        transition: all 0.2s ease-in-out;
+    }
+</style>

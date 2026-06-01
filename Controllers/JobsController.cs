@@ -67,7 +67,68 @@ namespace SkillMatch.Controllers
         // ============================================================================
         // VAI TRÒ: KHÁCH HÀNG (CLIENT)
         // ============================================================================
+        // ============================================================================
+        // TÍNH NĂNG MỚI: TRANG QUẢN LÝ DỰ ÁN DÀNH RIÊNG CHO CLIENT
+        // ============================================================================
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> Manage()
+        {
+            // 1. Lấy ID Nhà tuyển dụng đang đăng nhập từ Claims
+            var clientIdClaim = User.FindFirst("UserId")?.Value;
+            if (clientIdClaim == null) return Challenge();
+            int clientId = int.Parse(clientIdClaim);
 
+            // 2. Nạp toàn bộ danh sách Công việc của Client này kèm theo danh sách Đơn ứng tuyển và thông tin Sinh viên
+            var myJobs = await _context.Jobs
+                .Include(j => j.Applications)
+                    .ThenInclude(a => a.Student) // Nạp thông tin tài khoản Sinh viên từ bảng Users
+                .Where(j => j.ClientId == clientId)
+                .OrderByDescending(j => j.CreatedAt)
+                .ToListAsync();
+
+            return View(myJobs);
+        }
+
+        // ============================================================================
+        // TÍNH NĂNG MỚI: NGHIỆM THU DỰ ÁN VÀ LƯU ĐÁNH GIÁ (FEEDBACK)
+        // ============================================================================
+        // ============================================================================
+        // NGHIỆM THU DỰ ÁN VÀ LƯU ĐÁNH GIÁ (FEEDBACK CHÍNH XÁC TỪ CLIENT)
+        // ============================================================================
+        [HttpPost]
+        [Authorize(Roles = "Client")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveAndFeedback(int jobId, int rating, string comment)
+        {
+            var job = await _context.Jobs.FirstOrDefaultAsync(j => j.Id == jobId);
+            if (job == null) return NotFound();
+
+            if (rating < 1 || rating > 5)
+            {
+                TempData["ErrorMessage"] = "Vui lòng chọn số sao đánh giá hợp lệ từ 1 đến 5.";
+                return RedirectToAction(nameof(Manage));
+            }
+
+            // 1. Chuyển trạng thái công việc của dự án sang Completed (Hoàn thành)
+            job.Status = "Completed";
+            _context.Update(job);
+
+            // 2. Lấy dữ liệu người dùng nhập từ giao diện để lưu vào bảng Feedbacks
+            var feedback = new Feedback
+            {
+                JobId = jobId,
+                Rating = rating,
+                // Nếu người dùng xóa hết chữ thì mới dùng câu mặc định, còn không sẽ lưu đúng ý họ
+                Comment = !string.IsNullOrWhiteSpace(comment) ? comment.Trim() : "Sản phẩm bàn giao đạt yêu cầu, hoàn thành đúng tiến độ!",
+                CreatedAt = DateTime.Now
+            };
+            _context.Feedbacks.Add(feedback);
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Đã nghiệm thu hoàn thành dự án '{job.Title}' và lưu đánh giá thành công!";
+            return RedirectToAction(nameof(Manage));
+        }
         // 3. Giao diện Đăng tin tuyển dụng (Chỉ Khách hàng được quyền truy cập)
         [Authorize(Roles = "Client")]
         public async Task<IActionResult> Create()

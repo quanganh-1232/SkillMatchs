@@ -118,55 +118,63 @@
                                             <i class="bi bi-eye-fill"></i>
                                         </a>
 
-                                        @if (item.Status == "Accepted" && item.Job?.Status == "Processing")
-                                        {
-                                            <button type="button" class="btn btn-sm btn-success" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#submitJobModal-@item.Id" 
-                                                    title="Báo cáo hoàn thành & Nộp link bài">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
+                                        @if (item.Status == "Accepted" && (item.Job?.Status == "Processing" || item.Job?.Status == "PendingApproval"))
+{
+    var isReSubmit = item.Job?.Status == "PendingApproval";
 
-                                            <div class="modal fade" id="submitJobModal-@item.Id" tabindex="-1" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content text-start">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title fw-bold text-success">
-                                                                <i class="bi bi-send-check-fill me-1"></i> Gửi sản phẩm dự án
-                                                            </h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <form asp-controller="Student" asp-action="CompleteJob" method="post">
-                                                            @Html.AntiForgeryToken()
-                                                            <input type="hidden" name="applicationId" value="@item.Id" />
-                                                            
-                                                            <div class="modal-body">
-                                                                <div class="mb-2">
-                                                                    <label class="fw-semibold text-dark mb-1">Dự án:</label>
-                                                                    <p class="text-muted mb-2">@item.Job?.Title</p>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label fw-bold text-primary">
-                                                                        Đường dẫn sản phẩm (GitHub, Drive, Figma...) <span class="text-danger">*</span>
-                                                                    </label>
-                                                                    <div class="input-group">
-                                                                        <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                                                                        <input type="url" name="productUrl" class="form-control" 
-                                                                               placeholder="https://github.com/user/project" required />
-                                                                    </div>
-                                                                    <small class="text-muted d-block mt-1">Hệ thống sẽ gửi link này tới khách hàng để kiểm tra trước khi xác nhận tất toán hợp đồng.</small>
-                                                                </div>
-                                                            </div>
-                                                            
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                                                <button type="submit" class="btn btn-sm btn-success fw-bold px-3">Nộp sản phẩm & Đợi duyệt</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
+    <button type="button" class="btn btn-sm @(isReSubmit ? "btn-outline-warning" : "btn-success")" 
+            data-bs-toggle="modal" 
+            data-bs-target="#submitJobModal-@item.Id" 
+            title="@(isReSubmit ? "Cập nhật / Nộp lại link bài" : "Báo cáo hoàn thành & Nộp link bài")">
+        <i class="bi @(isReSubmit ? "bi-pencil-square" : "bi-check-lg")"></i>
+        @if(isReSubmit) { <span class="ms-1 small">Nộp lại</span> }
+    </button>
+
+    <div class="modal fade" id="submitJobModal-@item.Id" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-start">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold @(isReSubmit ? "text-warning" : "text-success")">
+                        <i class="bi bi-send-check-fill me-1"></i> @(isReSubmit ? "Cập nhật sản phẩm dự án" : "Gửi sản phẩm dự án")
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-controller="Student" asp-action="CompleteJob" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="applicationId" value="@item.Id" />
+                    
+                    <div class="modal-body">
+                        <div class="mb-2">
+                            <label class="fw-semibold text-dark mb-1">Dự án:</label>
+                            <p class="text-muted mb-2">@item.Job?.Title</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-primary">
+                                Đường dẫn sản phẩm (GitHub, Drive, Figma...) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+                                <input type="url" name="productUrl" class="form-control" 
+                                       placeholder="https://github.com/user/project" 
+                                       value="@item.ProductUrl" required />
+                            </div>
+                            <small class="text-muted d-block mt-1">
+                                @(isReSubmit ? "Bạn đang cập nhật lại đường dẫn mới. Hệ thống sẽ ghi đè link cũ." : "Hệ thống sẽ gửi link này tới khách hàng để kiểm tra trước khi xác nhận tất toán hợp đồng.")
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-sm @(isReSubmit ? "btn-warning text-dark" : "btn-success") fw-bold px-3">
+                            @(isReSubmit ? "Cập nhật sản phẩm" : "Nộp sản phẩm & Đợi duyệt")
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
                                     </div>
                                 </td>
                             </tr>

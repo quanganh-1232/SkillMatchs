@@ -1,0 +1,238 @@
+﻿@model IEnumerable<SkillMatch.Models.Job>
+@{
+    ViewData["Title"] = "Quản lý Dự án của tôi";
+}
+
+<div class="container my-4">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1"><i class="bi bi-kanban text-success me-2"></i>Bảng Quản Lý Dự Án</h3>
+            <p class="text-muted mb-0">Xem tiến độ dự án, duyệt sinh viên nhận việc và nghiệm thu sản phẩm bàn giao.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-success px-4 py-2 rounded-pill fw-bold shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Đăng việc mới
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 border border-dashed rounded-3 bg-white shadow-sm">
+            <i class="bi bi-folder-x text-muted display-3"></i>
+            <h5 class="fw-bold text-secondary mt-3">Bạn chưa đăng dự án nào</h5>
+            <p class="text-muted px-4">Hãy bắt đầu tìm kiếm nhân sự chất lượng bằng cách đăng các yêu cầu, công việc thực tế ngay hôm nay.</p>
+            <a asp-action="Create" class="btn btn-outline-success rounded-pill fw-bold px-4">Đăng dự án đầu tiên</a>
+        </div>
+    }
+    else
+    {
+        @foreach (var job in Model)
+        {
+            <div class="card shadow-sm border-0 rounded-3 mb-3 overflow-hidden">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 mb-3 mb-lg-0">
+                            <div class="d-flex align-items-center mb-2 flex-wrap gap-2">
+                                <h5 class="fw-bold text-dark mb-0">@job.Title</h5>
+
+                                @if (job.Status == "Active" || job.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-1.5"><i class="bi bi-hourglass-split me-1"></i>Đang tuyển dụng</span>
+                                }
+                                else if (job.Status == "Processing")
+                                {
+                                    <span class="badge bg-primary rounded-pill px-3 py-1.5"><i class="bi bi-gear-wide-connected spin-icon me-1"></i>Đang thực hiện</span>
+                                }
+                                else if (job.Status == "PendingApproval")
+                                {
+                                    <span class="badge bg-info text-dark rounded-pill px-3 py-1.5"><i class="bi bi-file-earmark-check-fill me-1"></i>Chờ nghiệm thu</span>
+                                }
+                                else if (job.Status == "Completed")
+                                {
+                                    <span class="badge bg-success rounded-pill px-3 py-1.5"><i class="bi bi-patch-check-fill me-1"></i>Đã hoàn thành</span>
+                                }
+                            </div>
+                            <p class="text-secondary small mb-2"><i class="bi bi-calendar3 me-1"></i> Ngày tạo: @job.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            <div class="d-flex gap-3 text-muted small">
+                                <span><i class="bi bi-currency-dollar text-success me-1"></i>Ngân sách: <strong class="text-dark">@job.Budget</strong></span>
+                                <span><i class="bi bi-people me-1"></i>Số lượt ứng tuyển: <strong class="text-dark">@job.Applications.Count</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 text-lg-end">
+                            @if (job.Status == "Active" || job.Status == "Pending")
+                            {
+                                <button class="btn btn-outline-primary rounded-pill fw-bold px-3 py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseApp-@job.Id">
+                                    <i class="bi bi-person-lines-fill me-1"></i> Danh sách ứng viên (@job.Applications.Count) <i class="bi bi-chevron-down small ms-1"></i>
+                                </button>
+                            }
+                            else if (job.Status == "Processing")
+                            {
+                                var acceptedApp = job.Applications.FirstOrDefault(a => a.Status == "Accepted");
+                                <div class="text-lg-end">
+                                    <span class="text-muted d-block small mb-1">Nhân sự thực hiện: <strong class="text-primary">@(acceptedApp?.Student?.FullName ?? "Sinh viên")</strong></span>
+                                    <button class="btn btn-light text-muted border rounded-pill disabled btn-sm px-3"><i class="bi bi-clock me-1"></i> Đang đợi sinh viên nộp sản phẩm báo cáo</button>
+                                </div>
+                            }
+                            else if (job.Status == "PendingApproval")
+                            {
+                                var studentApp = job.Applications.FirstOrDefault(a => a.Status == "Accepted");
+                                <div class="d-flex justify-content-lg-end align-items-center gap-2 flex-wrap">
+                                    <a href="@studentApp?.ProductUrl" target="_blank" class="btn btn-outline-dark rounded-pill fw-bold px-3 py-2">
+                                        <i class="bi bi-link-45deg me-1"></i> Xem sản phẩm của @studentApp?.Student?.FullName
+                                    </a>
+                                    <button class="btn btn-success rounded-pill fw-bold px-4 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalApprove-@job.Id">
+                                        <i class="bi bi-award-fill me-1"></i> Nghiệm thu & Đánh giá
+                                    </button>
+                                </div>
+                            }
+                            else if (job.Status == "Completed")
+                            {
+                                <span class="text-success fw-semibold p-2 d-inline-block"><i class="bi bi-shield-check me-1"></i> Dự án đã kết thúc thành công</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="collapse mt-3 pt-3 border-top" id="collapseApp-@job.Id">
+                        <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-people-fill me-1"></i>Danh sách sinh viên nộp đơn:</h6>
+                        @if (!job.Applications.Any())
+                        {
+                            <p class="text-muted small italic mb-0 px-2">Chưa có sinh viên nào nộp đơn ứng tuyển dự án này.</p>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle bg-light rounded-2 overflow-hidden border-0 mb-0">
+                                    <thead class="table-light">
+                                        <tr class="small text-muted">
+                                            <th>Thông tin ứng viên</th>
+                                            <th>Thư giới thiệu (Cover Letter)</th>
+                                            <th class="text-center">Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var app in job.Applications)
+                                        {
+                                            <tr>
+                                                <td style="width: 25%;">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="fw-bold text-dark">@app.Student?.FullName</div>
+
+                                                        <a asp-controller="Users"
+                                                           asp-action="Details"
+                                                           asp-route-id="@app.StudentId"
+                                                           target="_blank"
+                                                           class="btn btn-outline-secondary btn-xs rounded-circle p-0 d-inline-flex align-items-center justify-content-center hover-info-btn"
+                                                           style="width: 24px; height: 24px;"
+                                                           title="Xem hồ sơ năng lực của @app.Student?.FullName">
+                                                            <i class="bi bi-search" style="font-size: 11px;"></i>
+                                                        </a>
+                                                    </div>
+                                                    <div class="text-muted tiny-text">Nộp lúc: @app.AppliedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                                </td>
+                                                <td class="text-muted small" style="width: 55%; max-width: 300px; white-space: normal; word-break: break-word;">
+                                                    @app.CoverLetter
+                                                </td>
+                                                <td class="text-center" style="width: 20%;">
+                                                    <form asp-action="AcceptApplicant" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn bàn giao dự án này cho sinh viên @app.Student?.FullName thực hiện?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="applicationId" value="@app.Id" />
+                                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">
+                                                            <i class="bi bi-check-lg me-1"></i> Giao việc
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (job.Status == "PendingApproval")
+            {
+                <div class="modal fade" id="modalApprove-@job.Id" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow rounded-3">
+                            <div class="modal-header bg-success text-white py-3">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-star-fill me-2"></i>Nghiệm Thu & Đánh Giá Dự Án</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form asp-action="ApproveAndFeedback" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="jobId" value="@job.Id" />
+
+                                <div class="modal-body p-4">
+                                    <p class="text-muted small mb-3">Vui lòng để lại số sao hài lòng và lời nhận xét thực tế về quá trình làm việc của sinh viên. Đánh giá này sẽ hiển thị công khai trên hồ sơ của họ.</p>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-dark">Mức độ hoàn thành sản phẩm:</label>
+                                        <select class="form-select border-2" name="rating" required>
+                                            <option value="5" selected>⭐⭐⭐⭐⭐ 5 Sao - Xuất sắc / Rất hài lòng</option>
+                                            <option value="4">⭐⭐⭐⭐ 4 Sao - Tốt / Hài lòng</option>
+                                            <option value="3">⭐⭐⭐ 3 Sao - Đạt yêu cầu / Trung bình</option>
+                                            <option value="2">⭐⭐ 2 Sao - Chất lượng chưa tốt / Cần sửa lại</option>
+                                            <option value="1">⭐ 1 Sao - Không hoàn thiện / Rất kém</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold text-dark">Lời bình luận, nhận xét chi tiết:</label>
+                                        <textarea class="form-control border-2"
+                                      name="comment"
+                                      rows="4"
+                                      placeholder="Hãy viết vài lời nhận xét về thái độ, kỹ năng chuyên môn, khả năng giao tiếp hoặc chất lượng sản phẩm bàn giao của sinh viên..."
+                                      required>Sản phẩm hoàn thiện rất tốt, bàn giao đúng hạn và giao tiếp hiệu quả!</textarea>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer bg-light py-2">
+                                    <button type="button" class="btn btn-outline-secondary rounded-pill fw-bold" data-bs-dismiss="modal">Đóng lại</button>
+                                    <button type="submit" class="btn btn-success rounded-pill fw-bold px-4 shadow-sm">Xác nhận hoàn thành</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    }
+</div>
+
+<style>
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .spin-icon {
+        display: inline-block;
+        animation: spin 4s linear infinite;
+    }
+
+    .tiny-text {
+        font-size: 11px;
+    }
+</style>

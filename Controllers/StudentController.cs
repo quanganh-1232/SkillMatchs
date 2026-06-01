@@ -232,7 +232,10 @@ namespace SkillMatch.Controllers
                 return RedirectToAction(nameof(MyApplications));
             }
 
-            // LƯU LINK BÀI LÀM CỦA SINH VIÊN
+            // Kiểm tra xem đây là hành động nộp lần đầu hay nộp lại
+            bool isReSubmit = !string.IsNullOrEmpty(application.ProductUrl);
+
+            // LƯU / CẬP NHẬT LINK BÀI LÀM CỦA SINH VIÊN
             application.ProductUrl = productUrl;
 
             // CHUYỂN TRẠNG THÁI SANG: CHỜ KHÁCH HÀNG DUYỆT / NGHIỆM THU
@@ -242,7 +245,15 @@ namespace SkillMatch.Controllers
             _context.Update(application.Job);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = $"Đã nộp sản phẩm dự án '{application.Job.Title}' thành công! Vui lòng đợi khách hàng kiểm tra và nghiệm thu.";
+            // Thay đổi thông báo dựa vào việc nộp mới hay nộp lại
+            if (isReSubmit)
+            {
+                TempData["SuccessMessage"] = $"Đã cập nhật lại sản phẩm cho dự án '{application.Job.Title}' thành công!";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = $"Đã nộp sản phẩm dự án '{application.Job.Title}' thành công! Vui lòng đợi khách hàng kiểm tra và nghiệm thu.";
+            }
 
             return RedirectToAction(nameof(MyApplications));
         }

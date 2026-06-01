@@ -1,0 +1,339 @@
+﻿@model SkillMatch.Models.User
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+    var data = ViewBag.ProfileData as SkillMatch.Models.StudentProfileData;
+    var feedbacks = ViewBag.Feedbacks as List<SkillMatch.Models.Feedback> ?? new List<SkillMatch.Models.Feedback>();
+    double avgRating = ViewBag.AverageRating;
+}
+
+<div class="container mt-4">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
+        <div style="height: 200px; background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200') center/cover; position: relative;">
+            <div class="position-absolute start-0 bottom-0 p-4 d-flex align-items-center" style="transform: translateY(45px); z-index: 2;">
+                <img src="https://ui-avatars.com/api/?name=@System.Web.HttpUtility.UrlEncode(Model.FullName)&background=0D6EFD&color=fff&size=150"
+                     class="rounded-circle border border-4 border-white shadow" style="width: 120px; height: 120px; object-fit: cover;" />
+                <div class="ms-3 pt-4">
+                    <h3 class="fw-bold mb-1 text-dark">@Model.FullName <i class="bi bi-patch-check-fill text-primary ms-1 small"></i></h3>
+                    <p class="text-secondary fw-medium mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i> @(data?.School ?? "Chưa cập nhật trường học")</p>
+                </div>
+            </div>
+            <div class="position-absolute end-0 bottom-0 p-3 d-flex gap-2" style="transform: translateY(45px); z-index: 2;">
+                <button class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm" onclick="alert('Tính năng liên hệ đang phát triển!')"><i class="bi bi-chat-dots-fill me-1"></i> Liên hệ</button>
+                <button class="btn btn-light border rounded-circle shadow-sm" style="width:40px; height:40px;"><i class="bi bi-share"></i></button>
+            </div>
+        </div>
+        <div style="height: 60px;"></div>
+
+        <div class="px-4 pb-3 d-flex flex-wrap gap-2">
+            @if (avgRating >= 4.5 && feedbacks.Count > 0)
+            {
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold"><i class="bi bi-trophy-fill me-1"></i> Top Rated</span>
+            }
+            <span class="badge bg-info text-white px-3 py-2 rounded-pill fw-bold"><i class="bi bi-lightning-charge-fill me-1"></i> Fast Delivery</span>
+            <span class="badge text-white px-3 py-2 rounded-pill fw-bold" style="background-color: #6f42c1;"><i class="bi bi-graph-up-arrow me-1"></i> Rising Talent</span>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="bg-white p-2 rounded-3 shadow-sm mb-3">
+                <ul class="nav nav-pills nav-fill" id="profileTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active fw-bold py-2" id="intro-tab" data-bs-toggle="tab" data-bs-target="#intro" type="button" role="tab">Giới thiệu</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold py-2" id="services-tab" data-bs-toggle="tab" data-bs-target="#services" type="button" role="tab">Dịch vụ</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold py-2" id="portfolio-tab" data-bs-toggle="tab" data-bs-target="#portfolio" type="button" role="tab">Portfolio</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold py-2" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">Đánh giá</button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-content bg-white p-4 rounded-4 shadow-sm" style="min-height: 350px;" id="profileTabsContent">
+                <div class="tab-pane fade show active" id="intro" role="tabpanel">
+                    <h5 class="fw-bold text-dark mb-3">Về tôi</h5>
+                    @if (string.IsNullOrEmpty(data?.Bio))
+                    {
+                        <p class="text-muted italic">Chưa cấu hình thông tin mô tả bản thân.</p>
+                    }
+                    else
+                    {
+                        <p class="text-secondary lh-lg mb-4" style="white-space: pre-line; text-align: justify;">@data.Bio</p>
+                    }
+
+                    <h5 class="fw-bold text-dark mb-3 border-top pt-3">Kỹ năng</h5>
+                    @if (data?.SkillList == null || !data.SkillList.Any())
+                    {
+                        <p class="text-muted italic">Chưa khai báo danh sách kỹ năng trên hệ thống.</p>
+                    }
+                    else
+                    {
+                        <div class="row row-cols-1 row-cols-md-2 g-3">
+                            @foreach (var skill in data.SkillList)
+                            {
+                                <div class="col">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-semibold text-secondary small">@skill.Name</span>
+                                        <span class="fw-bold text-primary small">@skill.Percentage%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-primary rounded" style="width: @skill.Percentage%"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="tab-pane fade" id="services" role="tabpanel">
+                    <h5 class="fw-bold text-dark mb-3">Gói dịch vụ cung cấp</h5>
+                    @if (data?.Services == null || !data.Services.Any())
+                    {
+                        <p class="text-muted italic text-center py-4">Thành viên chưa khởi tạo gói dịch vụ nào.</p>
+                    }
+                    else
+                    {
+                        @foreach (var svc in data.Services)
+                        {
+                            <div class="card border border-light p-3 mb-3 rounded-3 shadow-xs hover-effect">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="p-2 bg-primary-subtle text-primary rounded-3 me-3"><i class="bi bi-briefcase-fill fs-4"></i></div>
+                                        <div>
+                                            <h6 class="fw-bold text-dark mb-1">@svc.Title</h6>
+                                            <small class="text-muted"><i class="bi bi-bag-check-fill me-1"></i> @svc.OrdersCount</small>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="text-warning fw-bold d-block mb-1"><i class="bi bi-star-fill"></i> @svc.Rating</span>
+                                        <h5 class="text-danger fw-bold mb-0">@svc.PriceRange</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <div class="tab-pane fade" id="portfolio" role="tabpanel">
+                    <h5 class="fw-bold text-dark mb-3">Sản phẩm Portfolio thực tế</h5>
+                    @if (data?.Portfolio == null || !data.Portfolio.Any())
+                    {
+                        <p class="text-muted italic text-center py-4">Chưa có hình ảnh/sản phẩm dự án mẫu nào được tải lên.</p>
+                    }
+                    else
+                    {
+                        <div class="row row-cols-1 row-cols-md-2 g-3">
+                            @foreach (var proj in data.Portfolio)
+                            {
+                                <div class="col">
+                                    <div class="card border-0 rounded-3 overflow-hidden shadow-sm bg-dark text-white h-100 hover-effect">
+                                        <img src="@proj.ImageUrl" class="card-img opacity-75" style="height: 170px; object-fit: cover;" />
+                                        <div class="card-img-overlay d-flex flex-column justify-content-end" style="background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);">
+                                            <h6 class="fw-bold text-white mb-2 text-truncate">@proj.Title</h6>
+                                            <div class="d-flex justify-content-between small text-white-50 border-top border-secondary pt-2">
+                                                <span><i class="bi bi-eye-fill me-1"></i> @proj.Views</span>
+                                                <span><i class="bi bi-heart-fill text-danger me-1"></i> @proj.Likes</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="tab-pane fade" id="reviews" role="tabpanel">
+                    <div class="row align-items-center bg-light p-4 rounded-3 mb-4 text-center text-md-start">
+                        <div class="col-md-4 border-end border-2 text-center">
+                            <h1 class="display-4 fw-bold text-primary mb-0">@avgRating</h1>
+                            <div class="text-warning my-1 fs-5">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="bi bi-star-fill @(i <= avgRating ? "" : "opacity-25")"></i>
+                                }
+                            </div>
+                            <small class="text-muted d-block">Dựa trên @feedbacks.Count đánh giá thật</small>
+                        </div>
+                        <div class="col-md-8 ps-md-4 mt-2 mt-md-0">
+                            <h6 class="fw-bold text-secondary">Đánh giá thực tế từ nhà tuyển dụng</h6>
+                            <p class="small text-muted mb-0">Nhận xét khách quan thu về từ các doanh nghiệp sau khi sinh viên hoàn thành công việc được bàn giao.</p>
+                        </div>
+                    </div>
+
+                    @if (!feedbacks.Any())
+                    {
+                        <p class="text-muted text-center italic py-4">Chưa có lượt phản hồi/đánh giá nào từ doanh nghiệp.</p>
+                    }
+                    else
+                    {
+                        @foreach (var fb in feedbacks)
+                        {
+                            <div class="card border-0 border-bottom rounded-0 py-3 mb-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h6 class="fw-bold text-dark mb-0"><i class="bi bi-building me-2 text-primary"></i>Đối tác Doanh nghiệp</h6>
+                                    <span class="text-warning small">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="bi bi-star-fill @(i <= fb.Rating ? "" : "opacity-25")"></i>
+                                        }
+                                    </span>
+                                </div>
+                                <small class="text-muted d-block mb-2">Dự án: @fb.Job?.Title</small>
+                                <p class="text-secondary small ps-1">"@fb.Comment"</p>
+                                <small class="text-muted d-block text-end small">@fb.CreatedAt.ToString("dd/MM/yyyy")</small>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm p-4 bg-white rounded-4 position-sticky" style="top: 20px;">
+                <h5 class="fw-bold text-dark mb-4 border-bottom pb-2"><i class="bi bi-lightning-fill text-warning"></i> Thống kê hiệu suất</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Tổng số đánh giá</span>
+                    <strong class="text-dark">@feedbacks.Count</strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Tỷ lệ hoàn thành</span>
+                    <strong class="text-success">100%</strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="text-muted">Xếp hạng thực tế</span>
+                    <strong class="text-primary">@avgRating / 5.0</strong>
+                </div>
+                <hr />
+                <div class="small text-muted mb-3"><i class="bi bi-calendar-check me-1"></i> Thành viên hoạt động từ 2026</div>
+                <div class="d-flex align-items-center small text-success fw-bold mb-4">
+                    <span class="spinner-grow spinner-grow-sm text-success me-2"></span> Sẵn sàng nhận việc
+                </div>
+
+                @if (User.Identity.IsAuthenticated && User.FindFirst("UserId")?.Value == Model.Id.ToString() && User.IsInRole("Student"))
+                {
+                    <button class="btn btn-outline-primary w-100 fw-bold py-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <i class="bi bi-gear-fill me-1"></i> Thiết lập danh mục
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-4">
+            <form asp-controller="Student" asp-action="UpdateAdvancedProfile" method="post" class="d-flex flex-column h-100">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Cấu hình dữ liệu hồ sơ thực tế</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-4" style="max-height: 65vh; overflow-y: auto;">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Họ và Tên:</label>
+                            <input type="text" name="fullName" class="form-control" value="@Model.FullName" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Trường học / Học vấn:</label>
+                            <input type="text" name="school" class="form-control" value="@data?.School" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả bản thân (Về tôi):</label>
+                        <textarea name="bio" class="form-control" rows="3" required>@data?.Bio</textarea>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 mb-3 border">
+                        <h6 class="fw-bold text-primary mb-2"><i class="bi bi-sliders me-1"></i>Kỹ năng (Phân tách bằng dấu phẩy ",")</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="small text-muted">Tên kỹ năng:</label>
+                                <input type="text" name="skillNames" class="form-control form-control-sm" value="@(data?.SkillList != null ? string.Join(",", data.SkillList.Select(s => s.Name)) : "")" placeholder="Ví dụ: Photoshop, Premiere" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted">Mức độ tương ứng (%):</label>
+                                <input type="text" name="skillValues" class="form-control form-control-sm" value="@(data?.SkillList != null ? string.Join(",", data.SkillList.Select(s => s.Percentage)) : "")" placeholder="Ví dụ: 90,85" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 mb-3 border">
+                        <h6 class="fw-bold text-danger mb-2"><i class="bi bi-tags-fill me-1"></i>Gói dịch vụ (Ngăn cách bằng dấu gạch đứng "|")</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="small text-muted">Tên các dịch vụ:</label>
+                                <input type="text" name="svcTitles" class="form-control form-control-sm" value="@(data?.Services != null ? string.Join("|", data.Services.Select(s => s.Title)) : "")" placeholder="Dịch vụ A | Dịch vụ B" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted">Mức giá chi trả:</label>
+                                <input type="text" name="svcPrices" class="form-control form-control-sm" value="@(data?.Services != null ? string.Join("|", data.Services.Select(s => s.PriceRange)) : "")" placeholder="300k | 500k" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 border">
+                        <h6 class="fw-bold text-success mb-2"><i class="bi bi-images me-1"></i>Sản phẩm Portfolio (Ngăn cách bằng dấu gạch đứng "|")</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="small text-muted">Tên tiêu đề dự án:</label>
+                                <input type="text" name="portTitles" class="form-control form-control-sm" value="@(data?.Portfolio != null ? string.Join("|", data.Portfolio.Select(p => p.Title)) : "")" placeholder="Dự án 1 | Dự án 2" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted">Đường dẫn ảnh nền minh họa URL:</label>
+                                <input type="text" name="portImages" class="form-control form-control-sm" value="@(data?.Portfolio != null ? string.Join("|", data.Portfolio.Select(p => p.ImageUrl)) : "")" placeholder="https://url-anh-1 | https://url-anh-2" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light mt-auto">
+                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success fw-bold rounded-pill px-4">Lưu cấu hình</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .nav-pills .nav-link {
+        color: #495057;
+        background-color: transparent;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+
+    .hover-effect {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .hover-effect:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
+        }
+
+    .bg-primary-subtle {
+        background-color: #e7f1ff;
+    }
+</style>

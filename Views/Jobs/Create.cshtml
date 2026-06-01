@@ -1,0 +1,98 @@
+﻿@model SkillMatch.Models.Job
+
+@{
+    ViewData["Title"] = "Đăng dự án mới";
+    var categories = ViewBag.Categories as IEnumerable<SkillMatch.Models.Category> ?? new List<SkillMatch.Models.Category>();
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 mb-5">
+
+            <div class="mb-3">
+                <a asp-action="Index" class="btn btn-link text-decoration-none text-secondary p-0">
+                    <i class="bi bi-arrow-left shadow-none"></i> Quay lại danh sách dự án
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5">
+                <div class="text-center mb-4 border-bottom pb-3">
+                    <h2 class="fw-bold text-dark"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Đăng tin tuyển dụng mới</h2>
+                    <p class="text-muted small">Mô tả rõ ràng yêu cầu để tìm kiếm được những bạn sinh viên phù hợp nhất</p>
+                </div>
+
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Title" class="form-label fw-semibold text-dark">Tiêu đề dự án <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-fonts"></i></span>
+                            <input asp-for="Title" class="form-control" placeholder="Ví dụ: Thiết kế Slide PowerPoint thuyết trình dự án" required />
+                        </div>
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="CategoryId" class="form-label fw-semibold text-dark">Danh mục lĩnh vực <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted"><i class="bi bi-grid"></i></span>
+                                <select asp-for="CategoryId" class="form-select" required>
+                                    <option value="" disabled selected>-- Chọn danh mục --</option>
+                                    @foreach (var cat in categories)
+                                    {
+                                        <option value="@cat.Id">@cat.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Deadline" class="form-label fw-semibold text-dark">Hạn chót ứng tuyển <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted"><i class="bi bi-calendar-date"></i></span>
+                                <input asp-for="Deadline" type="date" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <span asp-validation-for="Deadline" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Budget" class="form-label fw-semibold text-dark">Ngân sách đề xuất (VNĐ) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-success fw-bold">₫</span>
+                            <input asp-for="Budget" type="number" class="form-control" placeholder="Nhập số tiền chi trả, ví dụ: 500000" min="10000" required />
+                        </div>
+                        <span asp-validation-for="Budget" class="text-danger small"></span>
+                        <div class="form-text text-muted small">Chi phí nên tương xứng với khối lượng công việc yêu cầu.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label fw-semibold text-dark">Mô tả chi tiết yêu cầu công việc <span class="text-danger">*</span></label>
+                        <textarea asp-for="Description" class="form-control" rows="6" placeholder="Vui lòng cung cấp đầy đủ thông tin:&#10;- Nội dung công việc cần làm là gì?&#10;- Yêu cầu kỹ năng/công cụ ra sao (Ví dụ: Canva, Photoshop...)?&#10;- Định dạng file hoặc sản phẩm cần bàn giao..." required></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 pt-2 border-top">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-send-fill me-1"></i> Đăng tin ngay lập tức
+                        </button>
+                        <a asp-action="Index" class="btn btn-light btn-lg rounded-pill text-secondary border-0">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
