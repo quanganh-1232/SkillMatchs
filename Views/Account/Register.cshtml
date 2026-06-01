@@ -1,0 +1,41 @@
+﻿@model SkillMatch.Models.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký thành viên";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5 card p-4 shadow-sm">
+        <h2 class="text-center text-success mb-4">Đăng Ký Tài Khoản</h2>
+        <form asp-action="Register" method="post">
+            <div class="mb-3">
+                <label class="form-label">Họ và tên</label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu</label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Xác nhận mật khẩu</label>
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Bạn tham gia với vai trò nào?</label>
+                <select asp-for="Role" class="form-select">
+                    <option value="Student">Sinh viên (Người tìm việc làm thêm)</option>
+                    <option value="Client">Khách hàng (Người cần thuê dịch vụ)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success w-100 py-2">Đăng Ký</button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,78 @@
+﻿@model SkillMatch.Models.Job
+<hr />
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-warning">@TempData["Message"]</div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (User.IsInRole("Student") && Model.Status == "Open")
+{
+    <div class="card p-4 shadow-sm bg-light mt-4">
+        <h4 class="text-primary">Ứng tuyển công việc này</h4>
+        <form asp-action="Apply" method="post">
+            <input type="hidden" name="jobId" value="@Model.Id" />
+            <div class="mb-3">
+                <label class="form-label fw-bold">Giới thiệu bản thân & Kinh nghiệm làm việc liên quan:</label>
+                <textarea name="coverLetter" class="form-control" rows="4" placeholder="Ví dụ: Chào anh/chị, em là sinh viên năm 3 chuyên ngành Thiết kế đồ họa, em đã có kinh nghiệm làm 10+ slide slide tương tự. Rất mong được hợp tác..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary px-4">Gửi đơn ứng tuyển</button>
+        </form>
+    </div>
+}
+else if (Model.Status != "Open" && User.IsInRole("Student"))
+{
+    <div class="alert alert-secondary mt-4">Công việc này đã đóng hoặc đã có người thực hiện.</div>
+}
+
+@if (User.IsInRole("Client"))
+{
+    <div class="mt-4">
+        <h4 class="text-success mb-3">Danh sách sinh viên ứng tuyển</h4>
+
+    @inject SkillMatch.Data.SkillMatchDbContext _context
+        @{
+            var applicants = _context.Applications
+            .Where(a => a.JobId == Model.Id)
+            .Select(a => new { a.Id, a.CoverLetter, a.Status, a.Student.FullName, a.Student.Email })
+            .ToList();
+        }
+
+        @if (!applicants.Any())
+        {
+            <p class="text-muted italic">Chưa có sinh viên nào ứng tuyển công việc này.</p>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var app in applicants)
+                {
+                    <div class="col-md-6 mb-3">
+                        <div class="card p-3 border-left border-info shadow-sm">
+                            <h5 class="fw-bold text-dark">@app.FullName</h5>
+                            <p class="text-muted small mb-1">Email: @app.Email</p>
+                            <p class="bg-white p-2 border rounded"><strong>Lời nhắn:</strong> @app.CoverLetter</p>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="badge @(app.Status == "Accepted" ? "bg-success" : app.Status == "Rejected" ? "bg-danger" : "bg-warning")">
+                                    @app.Status
+                                </span>
+
+                                @if (Model.Status == "Open" && app.Status == "Pending")
+                                {
+                                    <form asp-action="AcceptApplicant" method="post">
+                                        <input type="hidden" name="applicationId" value="@app.Id" />
+                                        <button type="submit" class="btn btn-outline-success btn-smfw-bold">Giao việc cho bạn này</button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
