@@ -254,3 +254,4 @@ D:\Downloads\PRN232\SkillMatch\obj\Debug\net8.0\refint\SkillMatch.dll
 D:\Downloads\PRN232\SkillMatch\obj\Debug\net8.0\SkillMatch.pdb
 D:\Downloads\PRN232\SkillMatch\obj\Debug\net8.0\SkillMatch.genruntimeconfig.cache
 D:\Downloads\PRN232\SkillMatch\obj\Debug\net8.0\ref\SkillMatch.dll
+D:\Downloads\PRN232\SkillMatch\obj\Debug\net8.0\SkillMatch.sourcelink.json

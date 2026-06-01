@@ -3,16 +3,44 @@
   "WorkspaceRootPath": "D:\\Downloads\\PRN232\\SkillMatch\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601170004_FixCascadeCompleteDatabase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Migrations\\20260601170004_FixCascadeCompleteDatabase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\data\\skillmatchdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|solutionrelative:data\\skillmatchdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601165800_CompleteDatabaseAndChatbot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Migrations\\20260601165800_CompleteDatabaseAndChatbot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\models\\chathistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|solutionrelative:models\\chathistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\models\\feedback.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|solutionrelative:models\\feedback.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\models\\transaction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|solutionrelative:models\\transaction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\models\\job.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|solutionrelative:models\\job.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\models\\category.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|solutionrelative:models\\category.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\views\\jobs\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|solutionrelative:views\\jobs\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\controllers\\jobscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|solutionrelative:controllers\\jobscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601162620_AddApplicationTable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Migrations\\20260601162620_AddApplicationTable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\models\\application.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -57,6 +85,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|solutionrelative:controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|d:\\downloads\\prn232\\skillmatch\\migrations\\20260601162620_addapplicationtable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0D39FB13-828A-40CC-BDA3-214BA2E8A474}|SkillMatch.csproj|solutionrelative:migrations\\20260601162620_addapplicationtable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -70,7 +102,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 12,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -79,59 +111,110 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-01T15:50:18.206Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Details.cshtml",
-              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Views\\Jobs\\Details.cshtml",
-              "RelativeDocumentMoniker": "Views\\Jobs\\Details.cshtml",
-              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Views\\Jobs\\Details.cshtml",
-              "RelativeToolTip": "Views\\Jobs\\Details.cshtml",
-              "ViewState": "AgIAACEAAAAAAAAAAAAAAAAAAAAcAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-01T16:28:09.889Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "JobsController.cs",
-              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Controllers\\JobsController.cs",
-              "RelativeDocumentMoniker": "Controllers\\JobsController.cs",
-              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Controllers\\JobsController.cs",
-              "RelativeToolTip": "Controllers\\JobsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAA2AAAAAAAAAA==",
+              "Title": "20260601170004_FixCascadeCompleteDatabase.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601170004_FixCascadeCompleteDatabase.cs",
+              "RelativeDocumentMoniker": "Migrations\\20260601170004_FixCascadeCompleteDatabase.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601170004_FixCascadeCompleteDatabase.cs",
+              "RelativeToolTip": "Migrations\\20260601170004_FixCascadeCompleteDatabase.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-01T16:27:07.977Z",
+              "WhenOpened": "2026-06-01T17:00:04.722Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "20260601162620_AddApplicationTable.cs",
-              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601162620_AddApplicationTable.cs",
-              "RelativeDocumentMoniker": "Migrations\\20260601162620_AddApplicationTable.cs",
-              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601162620_AddApplicationTable.cs",
-              "RelativeToolTip": "Migrations\\20260601162620_AddApplicationTable.cs",
+              "Title": "20260601165800_CompleteDatabaseAndChatbot.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601165800_CompleteDatabaseAndChatbot.cs",
+              "RelativeDocumentMoniker": "Migrations\\20260601165800_CompleteDatabaseAndChatbot.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601165800_CompleteDatabaseAndChatbot.cs",
+              "RelativeToolTip": "Migrations\\20260601165800_CompleteDatabaseAndChatbot.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-01T16:26:20.829Z",
+              "WhenOpened": "2026-06-01T16:58:00.433Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "SkillMatchDbContext.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Data\\SkillMatchDbContext.cs",
+              "RelativeDocumentMoniker": "Data\\SkillMatchDbContext.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Data\\SkillMatchDbContext.cs",
+              "RelativeToolTip": "Data\\SkillMatchDbContext.cs",
+              "ViewState": "AgIAACcAAAAAAAAAAAAIwDIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-01T16:57:08.146Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "Application.cs",
-              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Application.cs",
-              "RelativeDocumentMoniker": "Models\\Application.cs",
-              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Application.cs",
-              "RelativeToolTip": "Models\\Application.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAAwBsAAAAAAAAAAAAAAA==",
+              "Title": "ChatHistory.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\ChatHistory.cs",
+              "RelativeDocumentMoniker": "Models\\ChatHistory.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\ChatHistory.cs",
+              "RelativeToolTip": "Models\\ChatHistory.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-01T16:25:29.805Z",
+              "WhenOpened": "2026-06-01T16:56:56.527Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Feedback.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Feedback.cs",
+              "RelativeDocumentMoniker": "Models\\Feedback.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Feedback.cs",
+              "RelativeToolTip": "Models\\Feedback.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-01T16:56:42.342Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Transaction.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Transaction.cs",
+              "RelativeDocumentMoniker": "Models\\Transaction.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Transaction.cs",
+              "RelativeToolTip": "Models\\Transaction.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAxwBoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-01T16:56:29.173Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Job.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Job.cs",
+              "RelativeDocumentMoniker": "Models\\Job.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Job.cs",
+              "RelativeToolTip": "Models\\Job.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwB4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-01T16:55:52.695Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Category.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Category.cs",
+              "RelativeDocumentMoniker": "Models\\Category.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Category.cs",
+              "RelativeToolTip": "Models\\Category.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-01T16:55:38.426Z",
               "EditorCaption": ""
             },
             {
@@ -167,8 +250,61 @@
               "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 8,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Views\\Jobs\\Details.cshtml",
+              "RelativeDocumentMoniker": "Views\\Jobs\\Details.cshtml",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Views\\Jobs\\Details.cshtml",
+              "RelativeToolTip": "Views\\Jobs\\Details.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T16:28:09.889Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "JobsController.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Controllers\\JobsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\JobsController.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Controllers\\JobsController.cs",
+              "RelativeToolTip": "Controllers\\JobsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-01T16:27:07.977Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "20260601162620_AddApplicationTable.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601162620_AddApplicationTable.cs",
+              "RelativeDocumentMoniker": "Migrations\\20260601162620_AddApplicationTable.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601162620_AddApplicationTable.cs",
+              "RelativeToolTip": "Migrations\\20260601162620_AddApplicationTable.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-01T16:26:20.829Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Application.cs",
+              "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Application.cs",
+              "RelativeDocumentMoniker": "Models\\Application.cs",
+              "ToolTip": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\Application.cs",
+              "RelativeToolTip": "Models\\Application.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwBsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-01T16:25:29.805Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
@@ -176,12 +312,11 @@
               "RelativeToolTip": "appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAABGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-06-01T16:17:59.152Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-01T16:17:59.152Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 13,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
@@ -189,12 +324,11 @@
               "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAEsAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-01T16:15:33.346Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-01T16:15:33.346Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 14,
               "Title": "20260601160032_InitialCreate.cs",
               "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\20260601160032_InitialCreate.cs",
               "RelativeDocumentMoniker": "Migrations\\20260601160032_InitialCreate.cs",
@@ -202,12 +336,11 @@
               "RelativeToolTip": "Migrations\\20260601160032_InitialCreate.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-01T16:13:01.152Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-01T16:13:01.152Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 15,
               "Title": "SkillMatchDbContextModelSnapshot.cs",
               "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Migrations\\SkillMatchDbContextModelSnapshot.cs",
               "RelativeDocumentMoniker": "Migrations\\SkillMatchDbContextModelSnapshot.cs",
@@ -215,12 +348,11 @@
               "RelativeToolTip": "Migrations\\SkillMatchDbContextModelSnapshot.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-01T16:12:55.998Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-01T16:12:55.998Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 16,
               "Title": "RegisterViewModel.cs",
               "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\ViewModels\\RegisterViewModel.cs",
               "RelativeDocumentMoniker": "Models\\ViewModels\\RegisterViewModel.cs",
@@ -228,12 +360,11 @@
               "RelativeToolTip": "Models\\ViewModels\\RegisterViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-01T16:10:56.017Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-01T16:10:56.017Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 17,
               "Title": "LoginViewModel.cs",
               "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Models\\ViewModels\\LoginViewModel.cs",
               "RelativeDocumentMoniker": "Models\\ViewModels\\LoginViewModel.cs",
@@ -241,12 +372,11 @@
               "RelativeToolTip": "Models\\ViewModels\\LoginViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-01T16:10:36.595Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-01T16:10:36.595Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 18,
               "Title": "Register.cshtml",
               "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Views\\Account\\Register.cshtml",
               "RelativeDocumentMoniker": "Views\\Account\\Register.cshtml",
@@ -254,12 +384,11 @@
               "RelativeToolTip": "Views\\Account\\Register.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-01T16:08:57.099Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-01T16:08:57.099Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 19,
               "Title": "Login.cshtml",
               "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Views\\Account\\Login.cshtml",
               "RelativeDocumentMoniker": "Views\\Account\\Login.cshtml",
@@ -267,12 +396,11 @@
               "RelativeToolTip": "Views\\Account\\Login.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-06-01T16:08:16.441Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-01T16:08:16.441Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 20,
               "Title": "AccountController.cs",
               "DocumentMoniker": "D:\\Downloads\\PRN232\\SkillMatch\\Controllers\\AccountController.cs",
               "RelativeDocumentMoniker": "Controllers\\AccountController.cs",
@@ -280,8 +408,7 @@
               "RelativeToolTip": "Controllers\\AccountController.cs",
               "ViewState": "AgIAAEAAAAAAAAAAAAAgwGgAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-01T16:00:57.413Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-01T16:00:57.413Z"
             }
           ]
         }
