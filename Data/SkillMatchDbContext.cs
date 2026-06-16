@@ -14,8 +14,10 @@ namespace SkillMatch.Data
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<ChatHistory> ChatHistories { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 

@@ -1,0 +1,53 @@
+﻿@model IEnumerable<SkillMatch.Models.Job>
+@{
+    ViewData["Title"] = "Hộp thư nhắn tin";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-chat-left-text-fill text-primary me-2"></i> Danh sách cuộc hội thoại
+                    </h5>
+                    <small class="text-muted">Chọn một dự án bên dưới để bắt đầu trao đổi trực tuyến</small>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-chat-square-dots text-muted fs-1"></i>
+                            <p class="text-muted mt-2 mb-0">Bạn chưa có cuộc hội thoại nào công khai.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var job in Model)
+                            {
+                                <a asp-controller="Chat" asp-action="Room" asp-route-jobId="@job.Id"
+                                   class="list-group-item list-group-item-action p-3 d-flex justify-content-between align-items-center border-bottom border-light">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-primary-subtle p-2.5 text-primary d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                            <i class="bi bi-briefcase-fill fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1 fw-bold text-dark">@job.Title</h6>
+                                            <span class="badge bg-light text-secondary border border-secondary-subtle font-monospace" style="font-size: 11px;">
+                                                Room ID: #@job.Id
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                                        Vào phòng <i class="bi bi-arrow-right-short ms-1"></i>
+                                    </span>
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

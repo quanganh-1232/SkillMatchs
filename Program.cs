@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SkillMatch.Data;
+using SkillMatch.Hubs;
 
 namespace SkillMatch
 {
@@ -7,7 +8,10 @@ namespace SkillMatch
     {
         public static void Main(string[] args)
         {
+
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddSignalR();
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -57,6 +61,8 @@ namespace SkillMatch
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.MapHub<ChatHub>("/chatHub");
 
             app.Run();
         }
