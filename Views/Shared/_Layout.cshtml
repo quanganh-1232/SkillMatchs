@@ -70,8 +70,10 @@
                                 <span class="nav-link text-dark me-2 d-flex align-items-center">
                                     <i class="bi bi-person-circle text-secondary me-1.5 fs-5"></i>
                                     Chào, <span class="text-dark fw-bold ms-1">@User.Identity.Name</span>
+
                                     <span class="badge @(User.IsInRole("Client") ? "bg-success" : "bg-primary") px-2.5 py-1.5 rounded-pill font-monospace ms-2" style="font-size: 11px;">
-                                        <i class="@(User.IsInRole("Client") ? "bi bi-building" : "bi bi-mortarboard-fill") me-1"></i>@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                                        <i class="@(User.IsInRole("Client") ? "bi bi-building" : "bi bi-mortarboard-fill") me-1"></i>
+                                        @(User.IsInRole("Client") ? "Employer" : "Student")
                                     </span>
                                 </span>
                             </li>
@@ -117,6 +119,180 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <div id="skillmatch-bot-container" style="position: fixed; bottom: 25px; right: 25px; z-index: 99999; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <button id="btn-toggle-bot" style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35); font-size: 24px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+            <i class="bi bi-chat-dots-fill" id="bot-icon"></i>
+        </button>
+
+        <div id="bot-chat-window" style="display: none; width: 380px; height: 520px; background: #ffffff; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); flex-direction: column; overflow: hidden; border: 1px solid #e5e7eb; position: absolute; bottom: 70px; right: 0;">
+            <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 16px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 10px; height: 10px; background-color: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></div>
+                    <div>
+                        <div style="font-size: 14px; letter-spacing: 0.3px;">Trợ lý AI - SkillMatch</div>
+                        <div style="font-size: 11px; color: #cbd5e1; font-weight: normal; margin-top: 1px;">Tìm việc thông minh thế hệ mới</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button id="btn-minimize-bot" style="background: transparent; border: none; color: white; font-size: 22px; cursor: pointer; line-height: 1;">×</button>
+                </div>
+            </div>
+
+            <div id="bot-chat-logs" style="flex: 1; padding: 16px; overflow-y: auto; background-color: #f8fafc; display: flex; flex-direction: column; gap: 12px; font-size: 13.5px; line-height: 1.5; color: #334155;">
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <div class="default-welcome" style="align-self: flex-start; background: #ffffff; border: 1px solid #e2e8f0; color: #1e293b; padding: 12px 16px; border-radius: 14px 14px 14px 0px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); max-width: 85%;">
+                        Xin chào! 👋 Mình là Trợ lý AI của SkillMatch. Mình có thể hỗ trợ bạn tìm kiếm các dự án phù hợp với năng lực ngay lập tức!
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center my-auto p-4 d-flex flex-column align-items-center justify-content-center" style="height: 100%;">
+                        <i class="bi bi-lock-fill text-muted" style="font-size: 42px;"></i>
+                        <h6 class="fw-bold text-dark mt-3">Yêu cầu đăng nhập</h6>
+                        <p class="text-muted small mb-4 px-2" style="font-size: 13px;">Vui lòng đăng nhập tài khoản SkillMatch để sử dụng tính năng Trợ lý AI đồng bộ hóa dự án tuyển dụng.</p>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border: none;">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập ngay
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <div style="padding: 14px; border-top: 1px solid #f1f5f9; display: flex; gap: 8px; background: #ffffff;">
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <input type="text" id="bot-user-input" placeholder="Tìm theo kỹ năng, công nghệ (ví dụ: figma, web)..." style="flex: 1; padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 24px; outline: none; font-size: 13px;" />
+                    <button id="btn-send-bot" style="background: #4f46e5; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                }
+                else
+                {
+                    <input type="text" placeholder="Vui lòng đăng nhập để sử dụng chat..." disabled style="flex: 1; padding: 10px 16px; border: 1px solid #e2e8f0; background-color: #f8fafc; border-radius: 24px; font-size: 13px; cursor: not-allowed;" />
+                    <button disabled style="background: #cbd5e1; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: not-allowed; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const btnToggle = document.getElementById("btn-toggle-bot");
+            const btnMinimize = document.getElementById("btn-minimize-bot");
+            const chatWindow = document.getElementById("bot-chat-window");
+            const btnSend = document.getElementById("btn-send-bot");
+            const userInput = document.getElementById("bot-user-input");
+            const chatLogs = document.getElementById("bot-chat-logs");
+            const botIcon = document.getElementById("bot-icon");
+
+            const isAuthenticated = @(User.Identity != null && User.Identity.IsAuthenticated ? "true" : "false");
+
+            if (isAuthenticated && chatLogs) {
+                fetch('/api/jobbot/history')
+                    .then(res => { if (res.status === 200) return res.json(); return null; })
+                    .then(data => {
+                        if (data && data.success && data.data.length > 0) {
+                            chatLogs.innerHTML = "";
+                            data.data.forEach(chat => {
+                                appendRenderedMsg(chat.userMessage, "user");
+                                appendRenderedMsg(chat.botResponse.replace(/\n/g, "<br>"), "bot");
+                            });
+                            chatLogs.scrollTop = chatLogs.scrollHeight;
+                        }
+                    }).catch(err => console.log("Không thể kết xuất dữ liệu lịch sử chat cũ."));
+            }
+
+            btnToggle.addEventListener("click", function () {
+                if (chatWindow.style.display === "none" || chatWindow.style.display === "") {
+                    chatWindow.style.display = "flex";
+                    botIcon.className = "bi bi-x-lg";
+                    if (userInput) userInput.focus();
+                    if (chatLogs) chatLogs.scrollTop = chatLogs.scrollHeight;
+                } else {
+                    chatWindow.style.display = "none";
+                    botIcon.className = "bi bi-chat-dots-fill";
+                }
+            });
+
+            btnMinimize.addEventListener("click", function () {
+                chatWindow.style.display = "none";
+                botIcon.className = "bi bi-chat-dots-fill";
+            });
+
+            if (btnSend && userInput) {
+                async function handleSend() {
+                    const messageText = userInput.value.trim();
+                    if (!messageText) return;
+
+                    appendRenderedMsg(messageText, "user");
+                    userInput.value = "";
+                    const loaderId = appendRenderedMsg("<span class='spinner-border spinner-border-sm me-2' role='status' style='width:11px; height:11px; color:#4f46e5;'></span> Đang truy vấn cơ sở dữ liệu...", "loading");
+
+                    try {
+                        const response = await fetch('/api/jobbot/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                            body: JSON.stringify({ message: messageText })
+                        });
+                        const result = await response.json();
+                        const loaderElem = document.getElementById(loaderId);
+                        if (loaderElem) loaderElem.remove();
+
+                        if (result.success && result.response) {
+                            let formattedResponse = result.response.replace(/\n/g, "<br>");
+                            appendRenderedMsg(formattedResponse, "bot");
+                        } else {
+                            appendRenderedMsg("⚠️ Hệ thống: " + (result.response || "Có lỗi xảy ra."), "bot");
+                        }
+                    } catch (error) {
+                        const loaderElem = document.getElementById(loaderId);
+                        if (loaderElem) loaderElem.remove();
+                        appendRenderedMsg("❌ Lỗi kết nối: Không thể đồng bộ dịch vụ AI.", "bot");
+                    }
+                }
+                btnSend.addEventListener("click", handleSend);
+                userInput.addEventListener("keypress", function (e) { if (e.key === "Enter") handleSend(); });
+            }
+
+            function appendRenderedMsg(text, sender) {
+                if (!chatLogs) return;
+                const id = "msg-" + Date.now();
+                const wrapper = document.createElement("div");
+                wrapper.id = id;
+                if (sender === "user") {
+                    wrapper.style.alignSelf = "flex-end";
+                    wrapper.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+                    wrapper.style.color = "#ffffff";
+                    wrapper.style.padding = "10px 14px";
+                    wrapper.style.borderRadius = "14px 14px 0px 14px";
+                    wrapper.style.maxWidth = "85%";
+                } else if (sender === "loading") {
+                    wrapper.style.alignSelf = "flex-start";
+                    wrapper.style.background = "#f1f5f9";
+                    wrapper.style.color = "#64748b";
+                    wrapper.style.padding = "10px 14px";
+                    wrapper.style.borderRadius = "14px 14px 14px 0px";
+                    wrapper.style.fontSize = "12px";
+                    wrapper.style.fontStyle = "italic";
+                } else {
+                    wrapper.style.alignSelf = "flex-start";
+                    wrapper.style.background = "#ffffff";
+                    wrapper.style.border = "1px solid #e2e8f0";
+                    wrapper.style.color = "#0f172a";
+                    wrapper.style.padding = "12px 14px";
+                    wrapper.style.borderRadius = "14px 14px 14px 0px";
+                    wrapper.style.maxWidth = "85%";
+                }
+                wrapper.innerHTML = text;
+                chatLogs.appendChild(wrapper);
+                chatLogs.scrollTop = chatLogs.scrollHeight;
+                return id;
+            }
+        });
+    </script>
 </body>
 </html>
 

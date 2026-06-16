@@ -5,6 +5,16 @@
     ViewData["Title"] = Model?.Title ?? "Chi tiết công việc";
     var currentUserIdClaim = User.FindFirst("UserId")?.Value;
     int currentUserId = currentUserIdClaim != null ? int.Parse(currentUserIdClaim) : 0;
+
+    // Tự động kiểm tra xem dự án đã quá hạn chót nộp hồ sơ chưa (Đối chiếu thời gian thực tế)
+    bool isExpired = Model.Deadline < DateTime.Now;
+
+    // Kiểm tra xem sinh viên hiện tại đã từng nộp đơn ứng tuyển cho dự án này chưa
+    var currentApp = _context.Applications.FirstOrDefault(a => a.JobId == Model.Id && a.StudentId == currentUserId);
+    bool hasApplied = currentApp != null;
+
+    // Chuẩn hóa chuỗi trạng thái từ DB (chuyển về viết thường để so sánh chính xác tuyệt đối)
+    string jobStatus = Model.Status?.ToLower() ?? "";
 }
 
 <div class="container mt-5">
@@ -36,10 +46,11 @@
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <span class="badge bg-primary px-3 py-2 fs-6">🏷️ @ViewBag.CategoryName</span>
 
-                    <span class="badge px-3 py-2 @(Model.Status == "Active" ? "bg-success" : Model.Status == "Processing" ? "bg-info" : Model.Status == "PendingApproval" ? "bg-warning text-dark" : "bg-secondary")">
-                        @(Model.Status == "Active" ? "Đang tuyển dụng" :
-                                                Model.Status == "Processing" ? "Đang thực hiện" :
-                                                Model.Status == "PendingApproval" ? "Chờ nghiệm thu" : "Đã kết thúc")
+                    <span class="badge px-3 py-2 @(isExpired && jobStatus == "open" ? "bg-danger" : jobStatus == "open" ? "bg-success" : jobStatus == "processing" ? "bg-info" : jobStatus == "pendingapproval" ? "bg-warning text-dark" : "bg-secondary")">
+                        @(isExpired && jobStatus == "open" ? "Hết hạn nộp đơn" :
+                            jobStatus == "open" ? "Đang tuyển dụng" :
+                            jobStatus == "processing" ? "Đang thực hiện" :
+                            jobStatus == "pendingapproval" ? "Chờ nghiệm thu" : "Đã kết thúc")
                     </span>
                 </div>
 
@@ -65,29 +76,55 @@
                     <h3 class="fw-bold text-success mb-0">@Model.Budget.ToString("N0") đ</h3>
                 </div>
                 <div class="d-flex align-items-center text-muted small">
-                    <i class="bi bi-clock-fill me-2 text-danger"></i>
+                    <i class="bi bi-clock-fill me-2 @(isExpired ? "text-danger" : "text-warning")"></i>
                     <span>Hạn chót nộp đơn: <strong class="text-dark">@Model.Deadline.ToString("dd/MM/yyyy")</strong></span>
                 </div>
             </div>
 
             @if (User.IsInRole("Student"))
             {
-                if (Model.Status == "Active")
+                if (jobStatus == "open")
                 {
-                    <div class="card p-4 shadow-sm border-0 bg-primary-subtle border-start border-primary border-4">
-                        <h4 class="text-primary fw-bold mb-3">🚀 Ứng tuyển dự án này</h4>
-                        <form asp-action="Apply" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="jobId" value="@Model.Id" />
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold small">Giới thiệu bản thân & Kinh nghiệm <span class="text-danger">*</span></label>
-                                <textarea name="coverLetter" class="form-control bg-white" rows="4" placeholder="Ví dụ: Chào anh/chị, em đã có kinh nghiệm..." required></textarea>
+                    if (isExpired)
+                    {
+                        <div class="card p-4 shadow-sm border-0 bg-danger-subtle text-center border-start border-danger border-4">
+                            <div class="fw-bold text-danger mb-0">
+                                <i class="bi bi-calendar-x-fill me-1"></i> Dự án này đã kết thúc hạn nộp đơn ứng tuyển!
                             </div>
-                            <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">Gửi đơn ứng tuyển</button>
-                        </form>
-                    </div>
+                        </div>
+                    }
+                    else if (hasApplied)
+                    {
+                        <div class="card p-4 shadow-sm border-0 bg-info-subtle border-start border-info border-4">
+                            <h5 class="text-info-emphasis fw-bold mb-2">📬 Đã nộp hồ sơ</h5>
+                            <p class="small text-muted mb-3">
+                                Bạn đã gửi đơn ứng tuyển cho dự án này. Trạng thái hiện tại:
+                                <span class="badge @(currentApp.Status == "Pending" ? "bg-warning text-dark" : currentApp.Status == "Accepted" ? "bg-success" : "bg-danger")">
+                                    @(currentApp.Status == "Pending" ? "Chờ duyệt" : currentApp.Status == "Accepted" ? "Được nhận" : "Từ chối")
+                                </span>
+                            </p>
+                            <div class="bg-white p-2 border rounded small text-secondary" style="white-space: pre-line;">
+                                <strong>Thư giới thiệu của bạn:</strong><br />@currentApp.CoverLetter
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card p-4 shadow-sm border-0 bg-primary-subtle border-start border-primary border-4">
+                            <h4 class="text-primary fw-bold mb-3">🚀 Ứng tuyển dự án này</h4>
+                            <form asp-action="Apply" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="jobId" value="@Model.Id" />
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Giới thiệu bản thân & Kinh nghiệm <span class="text-danger">*</span></label>
+                                    <textarea name="coverLetter" class="form-control bg-white" rows="4" placeholder="Ví dụ: Chào anh/chị, em đã có kinh nghiệm..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">Gửi đơn ứng tuyển</button>
+                            </form>
+                        </div>
+                    }
                 }
-                else if (Model.Status == "Processing")
+                else if (jobStatus == "processing")
                 {
                     <div class="card p-4 shadow-sm border-0 bg-info-subtle text-center border-start border-info border-4">
                         <div class="fw-semibold text-info-emphasis mb-3">
@@ -98,15 +135,12 @@
                         </button>
                     </div>
                 }
-                else if (Model.Status == "PendingApproval")
+                else if (jobStatus == "pendingapproval")
                 {
                     <div class="card p-4 shadow-sm border-0 bg-warning-subtle text-center border-start border-warning border-4">
                         <div class="fw-semibold text-warning-emphasis mb-0">
                             <i class="bi bi-hourglass-split"></i> Bạn đã nộp báo cáo! Vui lòng chờ khách hàng nghiệm thu.
                         </div>
-                        @{
-                            var currentApp = _context.Applications.FirstOrDefault(a => a.JobId == Model.Id && a.StudentId == currentUserId);
-                        }
                         @if (currentApp != null && !string.IsNullOrEmpty(currentApp.ProductUrl))
                         {
                             <div class="mt-3 text-start bg-white p-3 border rounded small">
@@ -116,7 +150,7 @@
                         }
                     </div>
                 }
-                else if (Model.Status == "Completed")
+                else if (jobStatus == "completed")
                 {
                     <div class="alert alert-success text-center fw-bold mb-0 p-3 shadow-sm">
                         🎉 Dự án đã kết thúc & Nghiệm thu tất toán hoàn tất!
@@ -124,7 +158,9 @@
                 }
             }
         </div>
-    </div> @if (User.IsInRole("Student") && Model.Status == "Processing")
+    </div>
+
+    @if (User.IsInRole("Student") && jobStatus == "processing")
     {
         <div class="modal fade" id="detailSubmitModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -136,7 +172,6 @@
                     <form asp-controller="Student" asp-action="CompleteJob" method="post">
                         @Html.AntiForgeryToken()
                         @{
-                            var currentApp = _context.Applications.FirstOrDefault(a => a.JobId == Model.Id && a.StudentId == currentUserId);
                             int appId = currentApp?.Id ?? 0;
                             var currentUrl = Context.Request.Path + Context.Request.QueryString;
                         }
@@ -203,7 +238,7 @@
                                     <span class="badge px-3 py-2 @(app.Status == "Accepted" ? "bg-success" : app.Status == "Rejected" ? "bg-danger" : "bg-warning text-dark")">
                                         @(app.Status == "Pending" ? "Chờ duyệt" : app.Status == "Accepted" ? "Đã nhận việc" : "Từ chối")
                                     </span>
-                                    @if (Model.Status == "Active" && app.Status == "Pending")
+                                    @if (jobStatus == "open" && app.Status == "Pending")
                                     {
                                         <form asp-action="AcceptApplicant" method="post">
                                             @Html.AntiForgeryToken()

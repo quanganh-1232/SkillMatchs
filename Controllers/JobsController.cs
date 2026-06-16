@@ -60,6 +60,30 @@ namespace SkillMatch.Controllers
             var client = await _context.Users.FirstOrDefaultAsync(u => u.Id == job.ClientId);
             ViewBag.ClientName = client?.FullName ?? "Nhà tuyển dụng ẩn danh";
 
+            // --- ĐOẠN BỔ SUNG: Kiểm tra trạng thái đóng/mở thực tế để ép giao diện hiển thị đúng ---
+            bool isExpired = job.Deadline < DateTime.Now;
+
+            // Nếu bạn muốn "Bypass" luôn mở nút khi test, hãy đổi dòng trên thành: bool isExpired = false;
+
+            ViewBag.IsExpired = isExpired;
+            ViewBag.JobStatus = job.Status; // "Active", "Processing", hoặc "Completed"
+
+            // Kiểm tra xem sinh viên hiện tại đăng nhập đã ứng tuyển bài này chưa
+            var studentIdClaim = User.FindFirst("UserId")?.Value;
+            if (studentIdClaim != null)
+            {
+                int studentId = int.Parse(studentIdClaim);
+                var application = await _context.Applications
+                    .FirstOrDefaultAsync(a => a.JobId == id && a.StudentId == studentId);
+
+                ViewBag.HasApplied = application != null;
+                ViewBag.ApplicationStatus = application?.Status; // "Pending", "Accepted", "Rejected"
+            }
+            else
+            {
+                ViewBag.HasApplied = false;
+            }
+
             return View(job);
         }
 
@@ -244,6 +268,27 @@ namespace SkillMatch.Controllers
 
             TempData["SuccessMessage"] = "Ứng tuyển thành công! Vui lòng chờ phản hồi từ nhà tuyển dụng.";
             return RedirectToAction("Details", new { id = jobId });
+        }
+
+        // Thêm Action này vào JobsController để phục vụ Live Search thời gian thực
+        [HttpGet]
+        public async Task<IActionResult> SearchJobs(string keyword)
+        {
+            // Khởi tạo truy vấn lấy danh sách Jobs
+            var query = _context.Jobs.AsQueryable();
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                keyword = keyword.ToLower();
+                // Đã loại bỏ hoàn toàn thuộc tính thừa lỗi (chỉ tìm kiếm dựa trên Tiêu đề và Mô tả)
+                query = query.Where(j => j.Title.ToLower().Contains(keyword) ||
+                                         j.Description.ToLower().Contains(keyword));
+            }
+
+            var resultList = await query.ToListAsync();
+
+            // Trả về một Partial View chứa cấu trúc HTML lặp các Card dự án
+            return PartialView("_JobListPartial", resultList);
         }
     }
 }

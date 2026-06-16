@@ -12,33 +12,42 @@ namespace SkillMatch.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        // Khai báo DbContext để tương tác với cơ sở dữ liệu
         private readonly SkillMatchDbContext _context;
 
-        // Tiêm cả Logger và DbContext thông qua hàm khởi tạo (Constructor)
         public HomeController(ILogger<HomeController> logger, SkillMatchDbContext context)
         {
             _logger = logger;
             _context = context;
         }
 
-        // Sửa hàm Index thành xử lý bất đồng bộ (async Task) để truy vấn DB mượt mà hơn
         public async Task<IActionResult> Index(string searchString)
         {
-            // 1. Tạo câu truy vấn cơ bản lấy các công việc có trạng thái là "Active"
-            var jobsQuery = _context.Jobs.Where(j => j.Status == "Active");
+            // 1. Sửa điều kiện Status từ "Active" thành "Open" để khớp với Database mẫu công việc đang mở tuyển
+            var jobsQuery = _context.Jobs.Include(j => j.Category).Where(j => j.Status == "Open");
 
-            // 2. Xử lý logic tìm kiếm nếu người dùng có gõ từ khóa ở thanh Search trên Banner
+            // 2. Logic tìm kiếm theo từ khóa (giữ nguyên)
             if (!string.IsNullOrEmpty(searchString))
             {
                 jobsQuery = jobsQuery.Where(j => j.Title.Contains(searchString)
                                               || j.Description.Contains(searchString));
             }
 
-            // 3. Sắp xếp dự án mới đăng lên đầu tiên và chuyển thành danh sách (List)
-            var activeJobs = await jobsQuery.OrderByDescending(j => j.CreatedAt).ToListAsync();
+            // 3. Sắp xếp: Ưu tiên công việc NỔI BẬT (IsFeatured) lên trước
+            var activeJobs = await jobsQuery
+                .OrderByDescending(j => j.IsFeatured)
+                .ThenByDescending(j => j.CreatedAt)
+                .ToListAsync();
 
-            // 4. Truyền danh sách công việc sang file Index.cshtml làm Model dữ liệu đầu vào
+            // 4. BỔ SUNG: Kéo danh sách Sinh viên tiêu biểu (IsVerified == true) từ Database lên trang chủ
+            var topStudents = await _context.Users
+                .Where(u => u.Role == "Student" && u.IsVerified == true)
+                .Take(4) // Lấy tối đa 4 sinh viên xuất sắc nhất hiển thị sidebar
+                .ToListAsync();
+
+            // Đẩy danh sách sinh viên vào ViewBag để file Index.cshtml bóc tách ra
+            ViewBag.TopStudents = topStudents;
+
+            // Trả danh sách Job về làm Model chính của trang chủ
             return View(activeJobs);
         }
 

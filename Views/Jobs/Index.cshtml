@@ -1,62 +1,176 @@
 ﻿@model IEnumerable<SkillMatch.Models.Job>
+
 @{
-    ViewData["Title"] = "Danh sách việc làm";
-    var categories = ViewBag.Categories as IEnumerable<SkillMatch.Models.Category>;
-    var selectedCategory = ViewBag.SelectedCategory as int?;
+    ViewData["Title"] = "Danh sách Dự án & Việc làm - SkillMatch";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark">💼 Danh sách việc làm sinh viên</h2>
-        @if (User.IsInRole("Client"))
-        {
-            <a asp-action="Create" class="btn btn-primary fw-bold">+ Đăng tin tuyển dụng</a>
-        }
-    </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/font/bootstrap-icons.min.css">
 
-    @if (categories != null && categories.Any())
-    {
-        <div class="mb-4">
-            <span class="fw-bold me-2">Lọc theo ngành:</span>
-            <a href="@Url.Action("Index", "Jobs")" class="btn btn-sm @(selectedCategory == null ? "btn-dark" : "btn-outline-dark") me-2">Tất cả</a>
-            @foreach (var cat in categories)
-            {
-                <a href="@Url.Action("Index", "Jobs", new { categoryId = cat.Id })"
-                   class="btn btn-sm @(selectedCategory == cat.Id ? "btn-dark" : "btn-outline-dark") me-2">
-                    @cat.Name
-                </a>
-            }
-        </div>
+<style>
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    <div class="row">
+    /* Khung ảnh cho Card việc làm */
+    .job-img-container {
+        position: relative;
+        height: 180px;
+        overflow: hidden;
+        border-radius: 12px 12px 0 0;
+        background-color: #eaedf2;
+    }
+
+        .job-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+    .job-card:hover .job-img-container img {
+        transform: scale(1.06);
+    }
+
+    /* Hiệu ứng đổ bóng chuẩn Card */
+    .job-card {
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border: none !important;
+        border-radius: 14px;
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.08) !important;
+        }
+
+    .badge-featured {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background-color: #ff6b00;
+        color: white;
+        font-weight: 700;
+        font-size: 11px;
+        padding: 5px 10px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(255, 107, 0, 0.4);
+    }
+
+    .badge-delivery {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background-color: rgba(0, 0, 0, 0.65);
+        color: white;
+        font-size: 11px;
+        padding: 5px 10px;
+        border-radius: 6px;
+        backdrop-filter: blur(4px);
+    }
+
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+        <div>
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 mb-2 small fw-semibold">
+                💼 Khám phá cơ hội
+            </span>
+            <h2 class="fw-bold text-dark mb-1">Thị trường Dự án & Việc làm</h2>
+            <p class="text-muted small mb-0">Tìm kiếm các công việc phù hợp với năng lực chuyên môn của bạn</p>
+        </div>
+
+        <div>
+            <form method="get" asp-action="Index" class="d-flex gap-2" onsubmit="return false;">
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute top-50 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" id="job-search-input" name="searchString" class="form-control rounded-pill ps-5" placeholder="Từ khóa tìm kiếm..." style="width: 260px; height: 42px;" autocomplete="off">
+                </div>
+                <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Tìm</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="job-list-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         @if (Model == null || !Model.Any())
         {
-            <div class="col-12 text-center py-5">
-                <p class="text-muted italic">Hiện tại chưa có công việc nào thuộc danh mục này.</p>
+            <div class="col-12 text-center py-5 bg-white rounded-3 border">
+                <i class="bi bi-folder-x text-muted display-4"></i>
+                <p class="text-muted mt-2 fw-medium">Hiện tại chưa có công việc nào phù hợp.</p>
             </div>
         }
         else
         {
-            @foreach (var item in Model)
+            @foreach (var job in Model)
             {
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title fw-bold text-primary mb-2">@item.Title</h5>
-                            <p class="card-text text-muted text-truncate flex-grow-1" style="max-height: 50px;">@item.Description</p>
+                <div class="col">
+                    <div class="card job-card shadow-sm">
+                        <div class="job-img-container">
+                            <img src="@(string.IsNullOrEmpty(job.Thumbnail) ? "/images/default-thumbnail.jpg" : job.Thumbnail)"
+                                 alt="@job.Title"
+                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60';" />
 
-                            <div class="mt-3">
-                                <p class="mb-1"><strong>💰 Ngân sách:</strong> <span class="text-success fw-bold">@item.Budget.ToString("N0") đ</span></p>
-                                <p class="mb-3 small text-secondary">📅 Hạn nộp: @item.Deadline.ToString("dd/MM/yyyy")</p>
-                            </div>
+                            @if (job.IsFeatured)
+                            {
+                                <div class="badge-featured"><i class="bi bi-fire"></i> Nổi bật</div>
+                            }
 
-                            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
-                                <span class="badge @(item.Status == "Active" ? "bg-success" : item.Status == "Processing" ? "bg-warning text-dark" : "bg-secondary")">
-                                    @item.Status
+                            @if (!string.IsNullOrEmpty(job.DeliveryTime))
+                            {
+                                <div class="badge-delivery"><i class="bi bi-lightning-auto"></i> @job.DeliveryTime</div>
+                            }
+                        </div>
+
+                        <div class="card-body p-3 d-flex flex-column">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-light text-primary text-xs border border-primary-subtle">
+                                    <i class="bi bi-tag-fill me-1"></i>@(job.Category?.Name ?? "Dự án đối tác")
                                 </span>
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary px-3">Xem chi tiết</a>
                             </div>
+
+                            <h5 class="fw-bold fs-6 mb-2">
+                                <a asp-action="Details" asp-route-id="@job.Id" class="text-decoration-none text-dark hover-primary text-truncate-2">
+                                    @job.Title
+                                </a>
+                            </h5>
+
+                            <p class="text-secondary small mb-3 text-truncate-2" style="font-size: 13px;">
+                                @job.Description
+                            </p>
+
+                            <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                                <div>
+                                    <small class="text-muted d-block" style="font-size: 10px; text-transform: uppercase;">Ngân sách</small>
+                                    <strong class="text-success fs-6 fw-bold">@job.Budget.ToString("N0") đ</strong>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block text-end" style="font-size: 10px; text-transform: uppercase;">Hạn chót</small>
+                                    <span class="text-dark fw-semibold small" style="font-size: 12px;">
+                                        <i class="bi bi-clock text-danger me-1"></i>@job.Deadline.ToString("dd/MM")
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-0 p-3 pt-0">
+                            <a asp-action="Details" asp-route-id="@job.Id" class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-bold">
+                                Xem chi tiết & Ứng tuyển
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -64,3 +178,29 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Lắng nghe sự kiện người dùng gõ chữ vào thanh tìm kiếm
+            $('#job-search-input').on('keyup input', function () {
+                var keyword = $(this).val(); // Lấy giá trị chữ vừa gõ
+
+                // Gọi Ajax đến Action "SearchJobs" trong "JobsController"
+                $.ajax({
+                    url: '@Url.Action("SearchJobs", "Jobs")',
+                    type: 'GET',
+                    data: { keyword: keyword },
+                    success: function (data) {
+                        // Nạp đè HTML từ PartialView (_JobListPartial) trả về vào trong vùng chứa danh sách
+                        $('#job-list-container').html(data);
+                    },
+                    error: function () {
+                        console.log("Xảy ra lỗi trong quá trình tìm kiếm thời gian thực.");
+                    }
+                });
+            });
+        });
+    </script>
+}

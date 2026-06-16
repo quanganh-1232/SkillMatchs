@@ -20,6 +20,9 @@ namespace SkillMatch.Models
 
         [Required]
         public string Role { get; set; } = "Student"; // "Student" hoặc "Client"
+        public string? Avatar { get; set; }
+        public bool IsVerified { get; set; } = false; // Hiện tag "Uy tín"
+        public string? Bio { get; set; }
 
         public string? Skills { get; set; } // Chỉ dành cho Sinh viên (ví dụ: "Edit Video, Canva")
         public decimal Balance { get; set; } = 0; // Số dư tài khoản (cho tính năng ví trung gian)

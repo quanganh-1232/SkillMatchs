@@ -16,7 +16,10 @@ namespace SkillMatch.Models
         [Required]
         public DateTime Deadline { get; set; }
 
-        // Open (Đang tuyển), Processing (Đang làm), Completed (Hoàn thành), Cancelled (Hủy)
+        public string? Thumbnail { get; set; }
+        public string? DeliveryTime { get; set; } // Ví dụ: "2-3 ngày"
+        public bool IsFeatured { get; set; } = false; // Mặc định là false
+        public int ViewsCount { get; set; } = 0;
         public string Status { get; set; } = "Open";
 
         public int ClientId { get; set; }

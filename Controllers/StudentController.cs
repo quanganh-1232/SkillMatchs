@@ -17,8 +17,6 @@ namespace SkillMatch.Controllers
             _context = context;
         }
 
-
-
         // ==========================================
         // 1. ACTION: HIỂN THỊ HỒ SƠ NĂNG LỰC ĐA TAB
         // ==========================================
@@ -73,7 +71,7 @@ namespace SkillMatch.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateAdvancedProfile(
-            string fullName, string bio, string school,
+            string fullName, string bio, string school, string avatarUrl, // ĐÃ BỔ SUNG: avatarUrl ở đây
             string skillNames, string skillValues,
             string svcTitles, string svcPrices,
             string portTitles, string portImages)
@@ -85,7 +83,9 @@ namespace SkillMatch.Controllers
             var student = await _context.Users.FirstOrDefaultAsync(u => u.Id == studentId);
             if (student == null) return NotFound();
 
+            // Thực hiện cập nhật dữ liệu cốt lõi của User
             student.FullName = fullName;
+            student.Avatar = avatarUrl; // ĐÃ BỔ SUNG: Cập nhật đường dẫn ảnh trực tiếp vào thuộc tính của thực thể User
 
             // Lấy lại dữ liệu JSON cũ đang có trong DB để so sánh, giữ lại tương tác
             StudentProfileData oldProfile;
@@ -179,8 +179,6 @@ namespace SkillMatch.Controllers
                     });
                 }
             }
-
-
 
             // Mã hóa đối tượng mới lại thành chuỗi JSON và cập nhật Database
             student.Skills = JsonSerializer.Serialize(newProfileData);

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SkillMatch.Data;
 
 namespace SkillMatch
@@ -11,22 +11,29 @@ namespace SkillMatch
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Cấu hình Kết nối Cơ sở dữ liệu SQL Server
             builder.Services.AddDbContext<SkillMatchDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            // 1. C?u h�nh x�c th?c b?ng Cookie
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // 1. Cấu hình xác thực bằng Cookie
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = "SkillMatchAuth";
             })
             .AddCookie("SkillMatchAuth", options =>
             {
-                options.LoginPath = "/Account/Login"; // ???ng d?n ??n trang ??ng nh?p n?u ch?a log-in
-                options.AccessDeniedPath = "/Account/AccessDenied"; // Trang b�o l?i n?u v�o nh?m quy?n
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // H?t h?n phi�n l�m vi?c sau 60 ph�t
+                options.LoginPath = "/Account/Login"; // Đường dẫn đến trang đăng nhập nếu chưa log-in
+                options.AccessDeniedPath = "/Account/AccessDenied"; // Trang báo lỗi nếu vào nhầm quyền
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Hết hạn phiên làm việc sau 60 phút
             });
 
-            // Th�m d?ch v? HttpContextAccessor ?? sau n�y g?i th�ng tin User ? m?i n?i
+            // Thêm dịch vụ HttpContextAccessor để sau này gọi thông tin User ở mọi nơi
             builder.Services.AddHttpContextAccessor();
+
+            // Đăng ký dịch vụ AI Gemini Client an toàn (Tránh Socket Exhaustion)
+            builder.Services.AddHttpClient<SkillMatch.Services.GeminiService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -42,6 +49,9 @@ namespace SkillMatch
 
             app.UseRouting();
 
+            // FIX: Bắt buộc phải kích hoạt Authentication trước khi Authorization chạy
+            // Định danh xem "Bạn là ai?" trước khi quyết định "Bạn có quyền làm gì?"
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

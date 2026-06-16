@@ -1,0 +1,71 @@
+﻿@model IEnumerable<SkillMatch.Models.Job>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="col-12 text-center py-5 bg-white rounded-3 border">
+        <i class="bi bi-folder-x text-muted display-4"></i>
+        <p class="text-muted mt-2 fw-medium">Không tìm thấy dự án nào khớp với từ khóa của bạn.</p>
+    </div>
+}
+else
+{
+    @foreach (var job in Model)
+    {
+        <div class="col">
+            <div class="card job-card shadow-sm">
+                <div class="job-img-container">
+                    <img src="@(string.IsNullOrEmpty(job.Thumbnail) ? "/images/default-thumbnail.jpg" : job.Thumbnail)"
+                         alt="@job.Title"
+                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60';" />
+
+                    @if (job.IsFeatured)
+                    {
+                        <div class="badge-featured"><i class="bi bi-fire"></i> Nổi bật</div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(job.DeliveryTime))
+                    {
+                        <div class="badge-delivery"><i class="bi bi-lightning-auto"></i> @job.DeliveryTime</div>
+                    }
+                </div>
+
+                <div class="card-body p-3 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-light text-primary text-xs border border-primary-subtle">
+                            <i class="bi bi-tag-fill me-1"></i>@(job.Category?.Name ?? "Dự án đối tác")
+                        </span>
+                    </div>
+
+                    <h5 class="fw-bold fs-6 mb-2">
+                        <a href="/Jobs/Details/@job.Id" class="text-decoration-none text-dark hover-primary text-truncate-2">
+                            @job.Title
+                        </a>
+                    </h5>
+
+                    <p class="text-secondary small mb-3 text-truncate-2" style="font-size: 13px;">
+                        @job.Description
+                    </p>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 10px; text-transform: uppercase;">Ngân sách</small>
+                            <strong class="text-success fs-6 fw-bold">@job.Budget.ToString("N0") đ</strong>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block text-end" style="font-size: 10px; text-transform: uppercase;">Hạn chót</small>
+                            <span class="text-dark fw-semibold small" style="font-size: 12px;">
+                                <i class="bi bi-clock text-danger me-1"></i>@job.Deadline.ToString("dd/MM")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-transparent border-0 p-3 pt-0">
+                    <a href="/Jobs/Details/@job.Id" class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-bold">
+                        Xem chi tiết & Ứng tuyển
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+}
