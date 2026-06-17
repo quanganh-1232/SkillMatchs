@@ -8,10 +8,7 @@ namespace SkillMatch.Models
     {
         [Key]
         public int Id { get; set; }
-
-        // 1. Liên kết tới Công việc/Dự án để gom nhóm phòng chat
-        [Required]
-        public int JobId { get; set; }
+        public int? JobId { get; set; }
 
         [ForeignKey("JobId")]
         public virtual Job? Job { get; set; }

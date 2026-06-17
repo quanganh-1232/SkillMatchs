@@ -1,28 +1,27 @@
 ﻿@model IEnumerable<SkillMatch.Models.ChatMessage>
 @{
     var job = ViewBag.Job as SkillMatch.Models.Job;
-    int currentUserId = ViewBag.CurrentUserId;
-    var currentUserName = ViewBag.CurrentUserName as string;
-    ViewData["Title"] = $"Hộp thoại trao đổi: {job.Title}";
+    int currentUserIdValue = ViewBag.CurrentUserId != null ? (int)ViewBag.CurrentUserId : 0;
+    var currentUserNameValue = ViewBag.CurrentUserName as string ?? "Ẩn danh";
+    ViewData["Title"] = $"Hộp thoại trao đổi: {(job != null ? job.Title : "")}";
 }
 
 <div class="container mt-4">
     <div class="card shadow-sm border-0 rounded-3">
         <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="mb-0 fw-bold"><i class="bi bi-chat-dots-fill me-2"></i>Phòng trao đổi dự án</h5>
-                <small class="text-white-50">Dự án: <strong>@job.Title</strong></small>
+                <h5 class="mb-0 fw-bold"><i class="bi bi-briefcase-fill me-2"></i>@((job != null) ? job.Title : "Phòng riêng")</h5>
+                <small class="text-white-50">Thảo luận nội bộ về dự án này</small>
             </div>
-            <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id" class="btn btn-sm btn-light rounded-pill fw-bold">
-                <i class="bi bi-arrow-left"></i> Chi tiết công việc
+            <a asp-controller="Chat" asp-action="Index" class="btn btn-sm btn-light rounded-pill fw-bold">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
             </a>
         </div>
 
         <div class="card-body bg-light position-relative p-4" id="chatBox" style="height: 450px; overflow-y: auto;">
             @foreach (var msg in Model)
             {
-                // So sánh số nguyên trực tiếp (int == int) rất an toàn
-                bool isMe = msg.SenderId == currentUserId;
+                bool isMe = msg.SenderId == currentUserIdValue;
                 <div class="d-flex mb-3 @(isMe ? "justify-content-end" : "justify-content-start")">
                     <div class="max-width-75">
                         @if (!isMe)
@@ -42,7 +41,7 @@
 
         <div class="card-footer bg-white border-0 p-3">
             <div class="input-group">
-                <textarea class="form-control border-2 shadow-none" id="messageInput" rows="1" placeholder="Nhập tin nhắn trao đổi tại đây... (Nhấn Enter để gửi)" style="resize: none;"></textarea>
+                <textarea class="form-control border-2 shadow-none" id="messageInput" rows="1" placeholder="Nhập nội dung trao đổi... (Enter để gửi)" style="resize: none;"></textarea>
                 <button class="btn btn-primary px-4 fw-bold" type="button" id="sendButton">
                     Gửi <i class="bi bi-send-fill ms-1"></i>
                 </button>
@@ -53,76 +52,84 @@
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
-
     <script>
-        const chatBox = document.getElementById("chatBox");
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        const jobId = "@job.Id";
-        // Lấy giá trị dưới dạng số nguyên (number) trong JS
-        const currentUserId = @currentUserId;
-        const currentUserName = "@currentUserName";
-
-        // ĐÃ SỬA: Khởi tạo đúng cú pháp chuẩn của thư viện SignalR
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/chatHub")
-            .build();
-
-        // Lắng nghe tin nhắn thời gian thực
-        connection.on("ReceiveMessage", function (senderId, senderName, message, timeStr) {
-            // ĐÃ SỬA: Ép kiểu dữ liệu đồng nhất số nguyên trước khi so sánh với dấu ===
-            const isMe = Number(senderId) === currentUserId;
-
-            const messageWrapper = document.createElement("div");
-            messageWrapper.className = `d-flex mb-3 ${isMe ? "justify-content-end" : "justify-content-start"}`;
-
-            messageWrapper.innerHTML = `
-                <div class="max-width-75">
-                    ${!isMe ? `<small class="text-muted d-block mb-1 fw-bold">${senderName}</small>` : ''}
-                    <div class="p-3 rounded-3 shadow-sm ${isMe ? 'bg-primary text-white rounded-end-0' : 'bg-white text-dark rounded-start-0'}">
-                        <p class="mb-0 small" style="white-space: pre-wrap;">${escapeHtml(message)}</p>
-                    </div>
-                    <small class="text-muted d-block mt-1 ${isMe ? 'text-end' : 'text-start'}" style="font-size: 10px;">${timeStr}</small>
-                </div>
-            `;
-
-            chatBox.appendChild(messageWrapper);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-
-        connection.start().then(function () {
-            connection.invoke("JoinJobChat", jobId).catch(function (err) {
-                return console.error(err.toString());
-            });
-        }).catch(function (err) {
-            return console.error(err.toString());
-        });
-
-        function sendMessageAction() {
-            const msgInput = document.getElementById("messageInput");
-            const msgText = msgInput.value.trim();
-            if (msgText === "") return;
-
-            connection.invoke("SendMessage", jobId, currentUserId.toString(), currentUserName, msgText)
-                .then(() => {
-                    msgInput.value = "";
-                    msgInput.focus();
-                })
-                .catch(function (err) {
-                    return console.error(err.toString());
-                });
-        }
-
-        document.getElementById("sendButton").addEventListener("click", sendMessageAction);
-        document.getElementById("messageInput").addEventListener("keydown", function (e) {
-            if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessageAction();
-            }
-        });
-
         function escapeHtml(text) {
+            if (!text) return "";
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const chatBox = document.getElementById("chatBox");
+            if (chatBox) { chatBox.scrollTop = chatBox.scrollHeight; }
+
+            const jobId = "@(job?.Id ?? 0)";
+            const currentUserId = parseInt("@currentUserIdValue") || 0;
+            const currentUserName = "@Html.Raw(currentUserNameValue)";
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .build();
+
+            connection.on("ReceiveMessage", function (senderId, senderName, message, timeStr, channelId) {
+                if (String(channelId) !== String(jobId)) return;
+
+                const isMe = Number(senderId) === currentUserId;
+                const messageWrapper = document.createElement("div");
+                messageWrapper.className = `d-flex mb-3 ${isMe ? "justify-content-end" : "justify-content-start"}`;
+
+                messageWrapper.innerHTML = `
+                    <div class="max-width-75">
+                        ${!isMe ? `<small class="text-muted d-block mb-1 fw-bold">${senderName}</small>` : ''}
+                        <div class="p-3 rounded-3 shadow-sm ${isMe ? 'bg-primary text-white rounded-end-0' : 'bg-white text-dark rounded-start-0'}">
+                            <p class="mb-0 small" style="white-space: pre-wrap;">${escapeHtml(message)}</p>
+                        </div>
+                        <small class="text-muted d-block mt-1 ${isMe ? 'text-end' : 'text-start'}" style="font-size: 10px;">${timeStr}</small>
+                    </div>
+                `;
+
+                if (chatBox) {
+                    chatBox.appendChild(messageWrapper);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+            });
+
+            connection.on("ReceiveSystemWarning", function (warningMessage) {
+                alert("⚠️ " + warningMessage);
+            });
+
+            connection.start().then(function () {
+                connection.invoke("JoinJobChat", String(jobId)).catch(function (err) {
+                    console.error("Lỗi tham gia phòng:", err.toString());
+                });
+            }).catch(err => console.error("Lỗi SignalR:", err.toString()));
+
+            function sendMessageAction() {
+                const msgInput = document.getElementById("messageInput");
+                if (!msgInput) return;
+
+                const msgText = msgInput.value.trim();
+                if (msgText === "") return;
+
+                connection.invoke("SendMessage", String(jobId), String(currentUserId), currentUserName, msgText)
+                    .then(() => {
+                        msgInput.value = "";
+                        msgInput.focus();
+                    })
+                    .catch(err => console.error(err.toString()));
+            }
+
+            const sendBtn = document.getElementById("sendButton");
+            if (sendBtn) { sendBtn.addEventListener("click", sendMessageAction); }
+
+            const msgInp = document.getElementById("messageInput");
+            if (msgInp) {
+                msgInp.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessageAction();
+                    }
+                });
+            }
+        });
     </script>
 }

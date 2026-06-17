@@ -1,0 +1,158 @@
+﻿@model IEnumerable<SkillMatch.Models.ChatMessage>
+@{
+    ViewData["Title"] = "Sảnh Thảo Luận Chung";
+    // Ép kiểu an toàn ngay tại tầng giao diện để tránh lỗi null tham chiếu
+    int myUserId = ViewBag.CurrentUserId != null ? (int)ViewBag.CurrentUserId : 0;
+    string myUserName = ViewBag.CurrentUserName as string ?? "Ẩn danh";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0 fw-bold"><i class="bi bi-globe2 text-info me-2"></i>Sảnh Thảo Luận Toàn Hệ Thống</h5>
+                <small class="text-white-50">Nơi giao lưu công khai giữa Doanh nghiệp và Sinh viên</small>
+            </div>
+            <a asp-controller="Chat" asp-action="Index" class="btn btn-sm btn-light rounded-pill fw-bold">
+                <i class="bi bi-chat-left-text"></i> Danh sách phòng riêng
+            </a>
+        </div>
+
+        <div class="card-body bg-light position-relative p-4" id="chatBox" style="height: 450px; overflow-y: auto;">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var msg in Model)
+                {
+                    bool isMe = msg.SenderId == myUserId;
+                    <div class="d-flex mb-3 @(isMe ? "justify-content-end" : "justify-content-start")">
+                        <div class="max-width-75">
+                            @if (!isMe)
+                            {
+                                <small class="text-muted d-block mb-1 fw-bold">
+                                    @(msg.Sender != null ? (!string.IsNullOrEmpty(msg.Sender.FullName) ? msg.Sender.FullName : msg.Sender.Email) : "Thành viên sảnh")
+                                </small>
+                            }
+                            <div class="p-3 rounded-3 shadow-sm @(isMe ? "bg-success text-white rounded-end-0" : "bg-white text-dark rounded-start-0")">
+                                <p class="mb-0 small" style="white-space: pre-wrap;">@msg.MessageContent</p>
+                            </div>
+                            <small class="text-muted d-block mt-1 @(isMe ? "text-end" : "text-start")" style="font-size: 10px;">
+                                @msg.SentAt.ToString("HH:mm")
+                            </small>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div id="noMessageNotice" class="text-center text-muted my-5">
+                    <i class="bi bi-chat-dots fs-1 d-block mb-2"></i>
+                    Chưa có tin nhắn nào tại Sảnh chung. Hãy gửi tin nhắn đầu tiên!
+                </div>
+            }
+        </div>
+
+        <div class="card-footer bg-white border-0 p-3">
+            <div class="input-group">
+                <textarea class="form-control border-2 shadow-none" id="messageInput" rows="1" placeholder="Nhập tin nhắn thảo luận công khai tại đây... (Enter để gửi)" style="resize: none;"></textarea>
+                <button class="btn btn-success px-4 fw-bold" type="button" id="sendButton">
+                    Gửi Sảnh <i class="bi bi-send-fill ms-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Tự động cuộn xuống đáy khi vừa tải trang sảnh chung
+            const initialChatBox = document.getElementById("chatBox");
+            if (initialChatBox) { initialChatBox.scrollTop = initialChatBox.scrollHeight; }
+
+            const jobId = "0";
+
+            // SỬA LỖI ĐỎ CS0103: Truy xuất trực tiếp từ ViewBag thông qua cú pháp Razor hợp lệ
+            const currentUserId = parseInt("@ViewBag.CurrentUserId") || 0;
+            const currentUserName = "@Html.Raw(ViewBag.CurrentUserName ?? "Ẩn danh")";
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .build();
+
+            // Lắng nghe tin real-time từ Hub đổ về sảnh công khai
+            connection.on("ReceiveMessage", function (senderId, senderName, message, timeStr, channelId) {
+                if (channelId && String(channelId).toLowerCase() !== "global") return;
+
+                const noMsgNotice = document.getElementById("noMessageNotice");
+                if (noMsgNotice) { noMsgNotice.remove(); }
+
+                const isMe = Number(senderId) === currentUserId;
+                const displayName = senderName && senderName.trim() !== "" ? senderName : "Thành viên sảnh";
+
+                const messageWrapper = document.createElement("div");
+                messageWrapper.className = `d-flex mb-3 ${isMe ? "justify-content-end" : "justify-content-start"}`;
+
+                messageWrapper.innerHTML = `
+                    <div class="max-width-75">
+                        ${!isMe ? `<small class="text-muted d-block mb-1 fw-bold">${escapeHtml(displayName)}</small>` : ''}
+                        <div class="p-3 rounded-3 shadow-sm ${isMe ? 'bg-success text-white rounded-end-0' : 'bg-white text-dark rounded-start-0'}">
+                            <p class="mb-0 small" style="white-space: pre-wrap;">${escapeHtml(message)}</p>
+                        </div>
+                        <small class="text-muted d-block mt-1 ${isMe ? 'text-end' : 'text-start'}" style="font-size: 10px;">${timeStr}</small>
+                    </div>
+                `;
+
+                const activeChatBox = document.getElementById("chatBox");
+                if (activeChatBox) {
+                    activeChatBox.appendChild(messageWrapper);
+                    activeChatBox.scrollTop = activeChatBox.scrollHeight;
+                }
+            });
+
+            connection.on("ReceiveSystemWarning", function (warningMessage) {
+                alert("⚠️ " + warningMessage);
+            });
+
+            // Tiến hành kích hoạt kết nối SignalR Hub
+            connection.start().then(function () {
+                connection.invoke("JoinGlobalChat").catch(function (err) {
+                    console.error("Lỗi tham gia Sảnh Chung:", err.toString());
+                });
+            }).catch(err => console.error("Lỗi kết nối sảnh chung:", err.toString()));
+
+            function sendMessageAction() {
+                const msgInput = document.getElementById("messageInput");
+                if (!msgInput) return;
+
+                const msgText = msgInput.value.trim();
+                if (msgText === "") return;
+
+                connection.invoke("SendMessage", String(jobId), String(currentUserId), currentUserName, msgText)
+                    .then(() => {
+                        msgInput.value = "";
+                        msgInput.focus();
+                    })
+                    .catch(err => console.error("Lỗi invoke SendMessage:", err.toString()));
+            }
+
+            const sendBtn = document.getElementById("sendButton");
+            if (sendBtn) { sendBtn.addEventListener("click", sendMessageAction); }
+
+            const msgInp = document.getElementById("messageInput");
+            if (msgInp) {
+                msgInp.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessageAction();
+                    }
+                });
+            }
+        });
+    </script>
+}

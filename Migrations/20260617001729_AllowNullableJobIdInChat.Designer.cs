@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkillMatch.Data;
 
@@ -11,9 +12,11 @@ using SkillMatch.Data;
 namespace SkillMatch.Migrations
 {
     [DbContext(typeof(SkillMatchDbContext))]
-    partial class SkillMatchDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260617001729_AllowNullableJobIdInChat")]
+    partial class AllowNullableJobIdInChat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -121,6 +124,7 @@ namespace SkillMatch.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("JobId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("MessageContent")
@@ -348,7 +352,9 @@ namespace SkillMatch.Migrations
                 {
                     b.HasOne("SkillMatch.Models.Job", "Job")
                         .WithMany()
-                        .HasForeignKey("JobId");
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SkillMatch.Models.User", "Sender")
                         .WithMany()

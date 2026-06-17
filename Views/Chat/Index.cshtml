@@ -11,14 +11,36 @@
                     <h5 class="mb-0 fw-bold text-dark">
                         <i class="bi bi-chat-left-text-fill text-primary me-2"></i> Danh sách cuộc hội thoại
                     </h5>
-                    <small class="text-muted">Chọn một dự án bên dưới để bắt đầu trao đổi trực tuyến</small>
+                    <small class="text-muted">Chọn một sảnh chung hoặc dự án bên dưới để bắt đầu trao đổi trực tuyến</small>
                 </div>
+
                 <div class="card-body p-0">
+                    <div class="p-3 border-bottom bg-light">
+                        <a asp-controller="Chat" asp-action="Global"
+                           class="list-group-item list-group-item-action p-3 rounded-3 d-flex justify-content-between align-items-center border-0 shadow-sm text-white bg-gradient"
+                           style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); transition: transform 0.2s;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle bg-info bg-opacity-25 p-2.5 text-info d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                    <i class="bi bi-globe2 fs-5 text-info animate-spin"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 fw-bold text-white">Sảnh Thảo Luận Toàn Hệ Thống</h6>
+                                    <span class="badge bg-info text-dark font-monospace fw-bold" style="font-size: 11px;">
+                                        Kênh Công Khai Mọi Thành Viên
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="btn btn-sm btn-info rounded-pill px-3 fw-bold text-dark shadow-sm">
+                                Vào Sảnh Chung <i class="bi bi-arrow-right-short ms-1"></i>
+                            </span>
+                        </a>
+                    </div>
+
                     @if (!Model.Any())
                     {
                         <div class="text-center py-5">
                             <i class="bi bi-chat-square-dots text-muted fs-1"></i>
-                            <p class="text-muted mt-2 mb-0">Bạn chưa có cuộc hội thoại nào công khai.</p>
+                            <p class="text-muted mt-2 mb-0">Bạn chưa tham gia vào dự án riêng biệt nào.</p>
                         </div>
                     }
                     else
@@ -51,3 +73,11 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Hiệu ứng di chuột cho Sảnh chung mượt mà hơn */
+    .bg-gradient:hover {
+        transform: translateY(-2px);
+        opacity: 0.95;
+    }
+</style>

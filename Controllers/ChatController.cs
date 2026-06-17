@@ -6,6 +6,7 @@ using SkillMatch.Models;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace SkillMatch.Controllers
 {
@@ -19,10 +20,8 @@ namespace SkillMatch.Controllers
             _context = context;
         }
 
-        // GET: /Chat hoặc /Chat/Index - Danh sách các phòng chat
         public async Task<IActionResult> Index()
         {
-            // ĐÃ SỬA: Lấy chính xác Claim "UserId" giống hệt bên JobsController
             var userIdClaim = User.FindFirst("UserId")?.Value;
             int.TryParse(userIdClaim, out int currentUserId);
 
@@ -30,7 +29,6 @@ namespace SkillMatch.Controllers
 
             if (User.IsInRole("Client"))
             {
-                // Nếu là Doanh nghiệp: Lấy các công việc do chính mình đăng
                 chatRooms = await _context.Jobs
                     .Where(j => j.ClientId == currentUserId)
                     .OrderByDescending(j => j.Id)
@@ -38,7 +36,6 @@ namespace SkillMatch.Controllers
             }
             else if (User.IsInRole("Student"))
             {
-                // Nếu là Sinh viên: Lấy các công việc mà mình đã ứng tuyển thành công (hoặc đang xử lý)
                 chatRooms = await _context.Applications
                     .Where(a => a.StudentId == currentUserId)
                     .Include(a => a.Job)
@@ -51,7 +48,6 @@ namespace SkillMatch.Controllers
             return View(chatRooms);
         }
 
-        // GET: /Chat/Room?jobId=... - Phòng chat chi tiết
         public async Task<IActionResult> Room(int jobId)
         {
             var job = await _context.Jobs.FirstOrDefaultAsync(j => j.Id == jobId);
@@ -64,15 +60,38 @@ namespace SkillMatch.Controllers
                 .Take(50)
                 .ToListAsync();
 
-            // ĐÃ SỬA: Lấy chính xác Claim "UserId"
             var userIdClaim = User.FindFirst("UserId")?.Value;
             int.TryParse(userIdClaim, out int currentUserIdInt);
 
+            // ĐÃ SỬA: Lấy FullName thực tế của người dùng từ cơ sở dữ liệu
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserIdInt);
+
             ViewBag.Job = job;
             ViewBag.CurrentUserId = currentUserIdInt;
-            ViewBag.CurrentUserName = User.Identity?.Name ?? "Ẩn danh";
+            ViewBag.CurrentUserName = user?.FullName ?? user?.Email ?? "Ẩn danh";
 
             return View(messages);
+        }
+
+        public async Task<IActionResult> Global()
+        {
+            var globalMessages = await _context.ChatMessages
+                .Include(m => m.Sender)
+                .Where(m => m.JobId == null)
+                .OrderBy(m => m.SentAt)
+                .Take(50)
+                .ToListAsync();
+
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            int.TryParse(userIdClaim, out int currentUserIdInt);
+
+            // ĐÃ SỬA: Lấy chính xác FullName hiển thị để tránh việc truyền Email làm rách bộ lọc Regex
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserIdInt);
+
+            ViewBag.CurrentUserId = currentUserIdInt;
+            ViewBag.CurrentUserName = user?.FullName ?? user?.Email ?? "Thành viên sảnh";
+
+            return View(globalMessages);
         }
     }
 }
