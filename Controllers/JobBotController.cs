@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillMatch.Data;
 using SkillMatch.Models;
-using SkillMatch.Services;
+using SkillMatch.Views.Services;
 using System.Security.Claims;
 
 namespace SkillMatch.Controllers

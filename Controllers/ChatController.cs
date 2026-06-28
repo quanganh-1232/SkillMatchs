@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillMatch.Data;
 using SkillMatch.Models;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using System;
 using System.Linq;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SkillMatch.Controllers
 {
@@ -20,78 +19,100 @@ namespace SkillMatch.Controllers
             _context = context;
         }
 
+        private int GetCurrentUserId()
+        {
+            var claim = User.FindFirst("UserId")?.Value;
+            return claim != null ? int.Parse(claim) : 0;
+        }
+
+        // =========================================================================
+        // ĐÃ THÊM: ACTION ĐÓN TIẾP TỪ NÚT "LIÊN HỆ" Ở HỒ SƠ SINH VIÊN (GIẢI QUYẾT LỖI 404)
+        // =========================================================================
+        public async Task<IActionResult> Connect(int studentId)
+        {
+            int myId = GetCurrentUserId();
+
+            // Nếu tự bấm vào nút liên hệ trên hồ sơ của chính mình
+            if (myId == studentId) return RedirectToAction(nameof(Index));
+
+            // Kiểm tra sinh viên đó có tồn tại không
+            var partnerExists = await _context.Users.AnyAsync(u => u.Id == studentId);
+            if (!partnerExists) return NotFound("Không tìm thấy thành viên này.");
+
+            // Điều hướng thẳng về phòng chat Room 1-1, truyền studentId vào tham số jobId của Room
+            return RedirectToAction(nameof(Room), new { jobId = studentId });
+        }
+
+        // 1. DANH SÁCH CUỘC HỘI THOẠI CÁ NHÂN
         public async Task<IActionResult> Index()
         {
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            int.TryParse(userIdClaim, out int currentUserId);
+            int myId = GetCurrentUserId();
 
-            List<Job> chatRooms = new List<Job>();
-
-            if (User.IsInRole("Client"))
-            {
-                chatRooms = await _context.Jobs
-                    .Where(j => j.ClientId == currentUserId)
-                    .OrderByDescending(j => j.Id)
-                    .ToListAsync();
-            }
-            else if (User.IsInRole("Student"))
-            {
-                chatRooms = await _context.Applications
-                    .Where(a => a.StudentId == currentUserId)
-                    .Include(a => a.Job)
-                    .Select(a => a.Job)
-                    .Where(j => j != null)
-                    .Distinct()
-                    .ToListAsync();
-            }
-
-            return View(chatRooms);
-        }
-
-        public async Task<IActionResult> Room(int jobId)
-        {
-            var job = await _context.Jobs.FirstOrDefaultAsync(j => j.Id == jobId);
-            if (job == null) return NotFound();
-
-            var messages = await _context.ChatMessages
-                .Include(m => m.Sender)
-                .Where(m => m.JobId == jobId)
-                .OrderBy(m => m.SentAt)
-                .Take(50)
+            // Tìm tất cả ID người dùng mà mình từng nhắn tin qua lại
+            var sharedUserIds = await _context.ChatMessages
+                .Where(m => m.SenderId == myId || m.ReceiverId == myId)
+                .Select(m => m.SenderId == myId ? m.ReceiverId : m.SenderId)
+                .Where(id => id != null && id != myId)
+                .Select(id => id!.Value)
+                .Distinct()
                 .ToListAsync();
 
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            int.TryParse(userIdClaim, out int currentUserIdInt);
+            // Lấy thông tin chi tiết của những người đó làm đối tác chat (Partners)
+            var partners = await _context.Users
+                .Where(u => sharedUserIds.Contains(u.Id))
+                .ToListAsync();
 
-            // ĐÃ SỬA: Lấy FullName thực tế của người dùng từ cơ sở dữ liệu
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserIdInt);
-
-            ViewBag.Job = job;
-            ViewBag.CurrentUserId = currentUserIdInt;
-            ViewBag.CurrentUserName = user?.FullName ?? user?.Email ?? "Ẩn danh";
-
-            return View(messages);
+            ViewBag.CurrentUserId = myId;
+            return View(partners);
         }
 
+        // 2. SẢNH THẢO LUẬN CHUNG SYSTEM
         public async Task<IActionResult> Global()
         {
+            int myId = GetCurrentUserId();
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == myId);
+
+            // Lấy 100 tin nhắn sảnh chung (ReceiverId == null)
             var globalMessages = await _context.ChatMessages
                 .Include(m => m.Sender)
-                .Where(m => m.JobId == null)
+                .Where(m => m.ReceiverId == null)
                 .OrderBy(m => m.SentAt)
-                .Take(50)
+                .Take(100)
                 .ToListAsync();
 
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            int.TryParse(userIdClaim, out int currentUserIdInt);
-
-            // ĐÃ SỬA: Lấy chính xác FullName hiển thị để tránh việc truyền Email làm rách bộ lọc Regex
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserIdInt);
-
-            ViewBag.CurrentUserId = currentUserIdInt;
-            ViewBag.CurrentUserName = user?.FullName ?? user?.Email ?? "Thành viên sảnh";
+            ViewBag.CurrentUserId = myId;
+            ViewBag.CurrentUserName = currentUser?.FullName ?? currentUser?.Email ?? "Thành viên";
 
             return View(globalMessages);
+        }
+
+        // 3. PHÒNG CHAT 1-1 RIÊNG BIỆT
+        public async Task<IActionResult> Room(int jobId) // Tham số 'jobId' đóng vai trò là partnerId nhận từ redirect
+        {
+            int myId = GetCurrentUserId();
+            int partnerId = jobId;
+
+            if (myId == partnerId) return RedirectToAction(nameof(Index));
+
+            var partner = await _context.Users.FirstOrDefaultAsync(u => u.Id == partnerId);
+            if (partner == null) return NotFound();
+
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == myId);
+
+            // Tải lịch sử tin nhắn giữa 2 người
+            var messages = await _context.ChatMessages
+                .Include(m => m.Sender)
+                .Where(m => (m.SenderId == myId && m.ReceiverId == partnerId) ||
+                            (m.SenderId == partnerId && m.ReceiverId == myId))
+                .OrderBy(m => m.SentAt)
+                .ToListAsync();
+
+            ViewBag.CurrentUserId = myId;
+            ViewBag.CurrentUserName = currentUser?.FullName ?? currentUser?.Email ?? "Ẩn danh";
+            ViewBag.PartnerId = partnerId;
+            ViewBag.PartnerName = partner.FullName ?? partner.Email ?? "Người dùng";
+
+            return View(messages);
         }
     }
 }

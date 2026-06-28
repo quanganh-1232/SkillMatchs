@@ -48,6 +48,19 @@ namespace SkillMatch.Data
                 .WithMany()
                 .HasForeignKey(f => f.JobId)
                 .OnDelete(DeleteBehavior.Restrict);
+            // Cấu hình mối quan hệ cho Người Gửi (Sender)
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(m => m.Sender)
+                .WithMany() // Hoặc .WithMany(u => u.SentMessages) nếu bạn có cấu hình ICollection trong thực thể User
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict); // Dùng Restrict hoặc NoAction để tránh xung đột Cascade vòng lặp
+
+            // Cấu hình mối quan hệ cho Người Nhận (Receiver)
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(m => m.Receiver)
+                .WithMany() // Hoặc .WithMany(u => u.ReceivedMessages) nếu có trong thực thể User
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

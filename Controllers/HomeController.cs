@@ -24,6 +24,32 @@ namespace SkillMatch.Controllers
 
         public async Task<IActionResult> Index(string searchString)
         {
+            // 1. Lấy thông tin người dùng hiện tại nếu đã đăng nhập
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            int currentUserIdInt = 0;
+            if (int.TryParse(userIdClaim, out currentUserIdInt))
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserIdInt);
+                ViewBag.CurrentUserId = currentUserIdInt;
+                ViewBag.CurrentUserName = user?.FullName ?? user?.Email ?? "Thành viên sảnh";
+            }
+            else
+            {
+                ViewBag.CurrentUserId = 0;
+                ViewBag.CurrentUserName = "Ẩn danh";
+            }
+
+            // 2. NẠP DỮ LIỆU CHAT SẢNH CHUNG (GLOBAL) - ĐÃ SỬA THEO DATABASE MỚI
+            // Sảnh chung là nơi các tin nhắn có ReceiverId == null
+            var globalMessages = await _context.ChatMessages
+                .Include(m => m.Sender)
+                .Where(m => m.ReceiverId == null)
+                .OrderBy(m => m.SentAt)
+                .Take(50)
+                .ToListAsync();
+
+            ViewBag.GlobalMessages = globalMessages;
+
             bool isClient = User.IsInRole("Client");
             ViewBag.IsClientHome = isClient;
             ViewBag.CurrentSearch = searchString;
@@ -50,7 +76,7 @@ namespace SkillMatch.Controllers
 
                 // Cột phải hiển thị: Gương mặt xuất sắc (Sinh viên có IsVerified == true)
                 ViewBag.FeaturedFaces = await _context.Users
-                    .Where(u => u.Role == "Student" && u.IsVerified == true)
+                    .Where(u => u.Role == "Student")
                     .Take(4)
                     .ToListAsync();
             }
@@ -124,7 +150,6 @@ namespace SkillMatch.Controllers
         }
     }
 
-    // Định nghĩa class ViewModel nằm ngoài class HomeController đúng chuẩn C#
     public class TopClientViewModel
     {
         public string FullName { get; set; } = "";

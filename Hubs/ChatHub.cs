@@ -17,86 +17,82 @@ namespace SkillMatch.Hubs
             _context = context;
         }
 
+        // Vào sảnh chung
         public async Task JoinGlobalChat()
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, GlobalGroupName);
         }
 
-        public override async Task OnConnectedAsync()
+        // Vào phòng chat 1-1 cá nhân (Sinh ra Group chung duy nhất giữa 2 Id)
+        public async Task JoinPrivateChat(string currentUserId, string partnerId)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, GlobalGroupName);
-            await base.OnConnectedAsync();
+            if (int.TryParse(currentUserId, out int id1) && int.TryParse(partnerId, out int id2))
+            {
+                string groupName = $"chat_private_{Math.Min(id1, id2)}_{Math.Max(id1, id2)}";
+                await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            }
         }
 
-        public async Task JoinJobChat(string jobId)
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"Job_{jobId}");
-        }
-
-        public async Task SendMessage(string jobId, string senderId, string senderName, string message)
+        public async Task SendMessage(string receiverIdStr, string senderIdStr, string senderName, string message)
         {
             if (string.IsNullOrWhiteSpace(message)) return;
 
-            try
+            // --- Logic bảo mật chặn SĐT / Email / Link ---
+            string normalizedText = message.ToLower()
+                .Replace("không", "0").Replace("khong", "0")
+                .Replace("một", "1").Replace("mot", "1")
+                .Replace("hai", "2").Replace("ba", "3")
+                .Replace("bốn", "4").Replace("bon", "4")
+                .Replace("năm", "5").Replace("nam", "5")
+                .Replace("sáu", "6").Replace("sau", "6")
+                .Replace("bảy", "7").Replace("bay", "7")
+                .Replace("tám", "8").Replace("tam", "8")
+                .Replace("chín", "9").Replace("chin", "9")
+                .Replace(" ", "");
+
+            string phonePattern = @"(?:\+84|0)[. -]?[0-9]{3}[. -]?[0-9]{3}[. -]?[0-9]{3,4}";
+            string linkPattern = @"(facebook\.com|fb\.com|zalo\.me|t\.me|telegram\.org|skype|http:\/\/|https:\/\/|www\.)";
+            string emailPattern = @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}";
+
+            if (Regex.IsMatch(normalizedText, phonePattern) ||
+                Regex.IsMatch(normalizedText, linkPattern, RegexOptions.IgnoreCase) ||
+                Regex.IsMatch(normalizedText, emailPattern))
             {
-                // ĐÃ SỬA: Chỉ chuẩn hóa và quét bộ lọc trên chính NỘI DUNG TIN NHẮN (message), tránh quét nhầm tên người dùng
-                string normalizedText = message.ToLower()
-                    .Replace("không", "0").Replace("khong", "0")
-                    .Replace("một", "1").Replace("mot", "1")
-                    .Replace("hai", "2").Replace("ba", "3")
-                    .Replace("bốn", "4").Replace("bon", "4")
-                    .Replace("năm", "5").Replace("nam", "5")
-                    .Replace("sáu", "6").Replace("sau", "6")
-                    .Replace("bảy", "7").Replace("bay", "7")
-                    .Replace("tám", "8").Replace("tam", "8")
-                    .Replace("chín", "9").Replace("chin", "9")
-                    .Replace(" ", "");
-
-                string phonePattern = @"(?:\+84|0)[. -]?[0-9]{3}[. -]?[0-9]{3}[. -]?[0-9]{3,4}";
-                string linkPattern = @"(facebook\.com|fb\.com|zalo\.me|t\.me|telegram\.org|skype|http:\/\/|https:\/\/|www\.)";
-                string emailPattern = @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}";
-
-                bool isViolated = Regex.IsMatch(normalizedText, phonePattern) ||
-                                  Regex.IsMatch(normalizedText, linkPattern, RegexOptions.IgnoreCase) ||
-                                  Regex.IsMatch(normalizedText, emailPattern);
-
-                if (isViolated)
-                {
-                    await Clients.Caller.SendAsync("ReceiveSystemWarning", "Hệ thống bảo mật: Tin nhắn chứa thông tin liên lạc ngoài hệ thống (SĐT, Email, Link).");
-                    return;
-                }
-
-                if (!int.TryParse(jobId, out int parsedJobId))
-                {
-                    parsedJobId = 0;
-                }
-                string timeStr = DateTime.Now.ToString("HH:mm");
-
-                if (!int.TryParse(senderId, out int parsedSenderId)) return;
-
-                var chatMsg = new ChatMessage
-                {
-                    JobId = parsedJobId == 0 ? null : (int?)parsedJobId,
-                    SenderId = parsedSenderId,
-                    MessageContent = message,
-                    SentAt = DateTime.Now
-                };
-
-                _context.ChatMessages.Add(chatMsg);
-                await _context.SaveChangesAsync();
-
-                if (parsedJobId == 0)
-                {
-                    await Clients.Group(GlobalGroupName).SendAsync("ReceiveMessage", senderId.ToString(), senderName, message, timeStr, "global");
-                }
-                else
-                {
-                    await Clients.Group($"Job_{jobId}").SendAsync("ReceiveMessage", senderId.ToString(), senderName, message, timeStr, jobId.ToString());
-                }
+                await Clients.Caller.SendAsync("ReceiveSystemWarning", "Hệ thống bảo mật: Tin nhắn chứa thông tin liên lạc ngoài hệ thống (SĐT, Email, Link).");
+                return;
             }
-            catch (Exception ex)
+
+            if (!int.TryParse(senderIdStr, out int senderId)) return;
+            int? receiverId = null;
+            if (!string.IsNullOrEmpty(receiverIdStr) && receiverIdStr.ToLower() != "global" && receiverIdStr != "0")
             {
-                System.Diagnostics.Debug.WriteLine("Lỗi SendMessage Hub: " + ex.Message);
+                if (int.TryParse(receiverIdStr, out int parsedId)) receiverId = parsedId;
+            }
+
+            // Lưu vào Database
+            var chatMsg = new ChatMessage
+            {
+                SenderId = senderId,
+                ReceiverId = receiverId,
+                MessageContent = message,
+                SentAt = DateTime.Now
+            };
+            _context.ChatMessages.Add(chatMsg);
+            await _context.SaveChangesAsync();
+
+            string timeStr = chatMsg.SentAt.ToString("HH:mm");
+
+            // Đẩy Realtime theo kênh tương ứng
+            if (receiverId == null)
+            {
+                // Gửi ra sảnh chung
+                await Clients.Group(GlobalGroupName).SendAsync("ReceiveMessage", senderIdStr, senderName, message, timeStr, "global");
+            }
+            else
+            {
+                // Gửi vào phòng 1-1 mã hóa tên nhóm
+                string groupName = $"chat_private_{Math.Min(senderId, receiverId.Value)}_{Math.Max(senderId, receiverId.Value)}";
+                await Clients.Group(groupName).SendAsync("ReceiveMessage", senderIdStr, senderName, message, timeStr, receiverIdStr);
             }
         }
     }

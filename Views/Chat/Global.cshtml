@@ -1,7 +1,6 @@
 ﻿@model IEnumerable<SkillMatch.Models.ChatMessage>
 @{
     ViewData["Title"] = "Sảnh Thảo Luận Chung";
-    // Ép kiểu an toàn ngay tại tầng giao diện để tránh lỗi null tham chiếu
     int myUserId = ViewBag.CurrentUserId != null ? (int)ViewBag.CurrentUserId : 0;
     string myUserName = ViewBag.CurrentUserName as string ?? "Ẩn danh";
 }
@@ -25,7 +24,7 @@
                 {
                     bool isMe = msg.SenderId == myUserId;
                     <div class="d-flex mb-3 @(isMe ? "justify-content-end" : "justify-content-start")">
-                        <div class="max-width-75">
+                        <div class="max-width-75" style="max-width: 75%;">
                             @if (!isMe)
                             {
                                 <small class="text-muted d-block mb-1 fw-bold">
@@ -71,13 +70,9 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            // Tự động cuộn xuống đáy khi vừa tải trang sảnh chung
-            const initialChatBox = document.getElementById("chatBox");
-            if (initialChatBox) { initialChatBox.scrollTop = initialChatBox.scrollHeight; }
+            const chatBox = document.getElementById("chatBox");
+            if (chatBox) { chatBox.scrollTop = chatBox.scrollHeight; }
 
-            const jobId = "0";
-
-            // SỬA LỖI ĐỎ CS0103: Truy xuất trực tiếp từ ViewBag thông qua cú pháp Razor hợp lệ
             const currentUserId = parseInt("@ViewBag.CurrentUserId") || 0;
             const currentUserName = "@Html.Raw(ViewBag.CurrentUserName ?? "Ẩn danh")";
 
@@ -85,9 +80,8 @@
                 .withUrl("/chatHub")
                 .build();
 
-            // Lắng nghe tin real-time từ Hub đổ về sảnh công khai
             connection.on("ReceiveMessage", function (senderId, senderName, message, timeStr, channelId) {
-                if (channelId && String(channelId).toLowerCase() !== "global") return;
+                if (channelId !== "global") return;
 
                 const noMsgNotice = document.getElementById("noMessageNotice");
                 if (noMsgNotice) { noMsgNotice.remove(); }
@@ -97,9 +91,8 @@
 
                 const messageWrapper = document.createElement("div");
                 messageWrapper.className = `d-flex mb-3 ${isMe ? "justify-content-end" : "justify-content-start"}`;
-
                 messageWrapper.innerHTML = `
-                    <div class="max-width-75">
+                    <div class="max-width-75" style="max-width: 75%;">
                         ${!isMe ? `<small class="text-muted d-block mb-1 fw-bold">${escapeHtml(displayName)}</small>` : ''}
                         <div class="p-3 rounded-3 shadow-sm ${isMe ? 'bg-success text-white rounded-end-0' : 'bg-white text-dark rounded-start-0'}">
                             <p class="mb-0 small" style="white-space: pre-wrap;">${escapeHtml(message)}</p>
@@ -108,10 +101,9 @@
                     </div>
                 `;
 
-                const activeChatBox = document.getElementById("chatBox");
-                if (activeChatBox) {
-                    activeChatBox.appendChild(messageWrapper);
-                    activeChatBox.scrollTop = activeChatBox.scrollHeight;
+                if (chatBox) {
+                    chatBox.appendChild(messageWrapper);
+                    chatBox.scrollTop = chatBox.scrollHeight;
                 }
             });
 
@@ -119,40 +111,30 @@
                 alert("⚠️ " + warningMessage);
             });
 
-            // Tiến hành kích hoạt kết nối SignalR Hub
             connection.start().then(function () {
-                connection.invoke("JoinGlobalChat").catch(function (err) {
-                    console.error("Lỗi tham gia Sảnh Chung:", err.toString());
-                });
-            }).catch(err => console.error("Lỗi kết nối sảnh chung:", err.toString()));
+                connection.invoke("JoinGlobalChat").catch(err => console.error(err));
+            }).catch(err => console.error(err));
 
             function sendMessageAction() {
                 const msgInput = document.getElementById("messageInput");
                 if (!msgInput) return;
-
                 const msgText = msgInput.value.trim();
                 if (msgText === "") return;
 
-                connection.invoke("SendMessage", String(jobId), String(currentUserId), currentUserName, msgText)
+                connection.invoke("SendMessage", "global", String(currentUserId), currentUserName, msgText)
                     .then(() => {
                         msgInput.value = "";
                         msgInput.focus();
-                    })
-                    .catch(err => console.error("Lỗi invoke SendMessage:", err.toString()));
+                    }).catch(err => console.error(err));
             }
 
-            const sendBtn = document.getElementById("sendButton");
-            if (sendBtn) { sendBtn.addEventListener("click", sendMessageAction); }
-
-            const msgInp = document.getElementById("messageInput");
-            if (msgInp) {
-                msgInp.addEventListener("keydown", function (e) {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessageAction();
-                    }
-                });
-            }
+            document.getElementById("sendButton")?.addEventListener("click", sendMessageAction);
+            document.getElementById("messageInput")?.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessageAction();
+                }
+            });
         });
     </script>
 }

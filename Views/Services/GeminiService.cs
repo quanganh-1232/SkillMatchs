@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 
-namespace SkillMatch.Services
+namespace SkillMatch.Views.Services
 {
     public class GeminiService
     {

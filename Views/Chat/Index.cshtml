@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SkillMatch.Models.Job>
+﻿@model IEnumerable<SkillMatch.Models.User>
 @{
     ViewData["Title"] = "Hộp thư nhắn tin";
 }
@@ -11,7 +11,7 @@
                     <h5 class="mb-0 fw-bold text-dark">
                         <i class="bi bi-chat-left-text-fill text-primary me-2"></i> Danh sách cuộc hội thoại
                     </h5>
-                    <small class="text-muted">Chọn một sảnh chung hoặc dự án bên dưới để bắt đầu trao đổi trực tuyến</small>
+                    <small class="text-muted">Chọn sảnh thảo luận hoặc người dùng bên dưới để bắt đầu trao đổi trực tuyến</small>
                 </div>
 
                 <div class="card-body p-0">
@@ -21,7 +21,7 @@
                            style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); transition: transform 0.2s;">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="rounded-circle bg-info bg-opacity-25 p-2.5 text-info d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
-                                    <i class="bi bi-globe2 fs-5 text-info animate-spin"></i>
+                                    <i class="bi bi-globe2 fs-5 text-info"></i>
                                 </div>
                                 <div>
                                     <h6 class="mb-1 fw-bold text-white">Sảnh Thảo Luận Toàn Hệ Thống</h6>
@@ -40,29 +40,34 @@
                     {
                         <div class="text-center py-5">
                             <i class="bi bi-chat-square-dots text-muted fs-1"></i>
-                            <p class="text-muted mt-2 mb-0">Bạn chưa tham gia vào dự án riêng biệt nào.</p>
+                            <p class="text-muted mt-2 mb-0">Bạn chưa có cuộc trò chuyện cá nhân nào gần đây.</p>
                         </div>
                     }
                     else
                     {
                         <div class="list-group list-group-flush">
-                            @foreach (var job in Model)
+                            @foreach (var partner in Model)
                             {
-                                <a asp-controller="Chat" asp-action="Room" asp-route-jobId="@job.Id"
+                                string displayName = partner.FullName ?? partner.Email ?? "Người dùng";
+                                string displaySub = $"({partner.Email})";
+                                string safeName = Uri.EscapeDataString(displayName);
+                                string avatarUrl = $"https://ui-avatars.com/api/?background=e0e7ff&color=4338ca&size=45&name={safeName}";
+
+                                <a asp-controller="Chat" asp-action="Room" asp-route-jobId="@partner.Id"
                                    class="list-group-item list-group-item-action p-3 d-flex justify-content-between align-items-center border-bottom border-light">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle bg-primary-subtle p-2.5 text-primary d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
-                                            <i class="bi bi-briefcase-fill fs-5"></i>
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <img src="@avatarUrl" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;" />
                                         </div>
                                         <div>
-                                            <h6 class="mb-1 fw-bold text-dark">@job.Title</h6>
-                                            <span class="badge bg-light text-secondary border border-secondary-subtle font-monospace" style="font-size: 11px;">
-                                                Room ID: #@job.Id
+                                            <h6 class="mb-1 fw-bold text-dark">@displayName <small class="text-muted fw-normal" style="font-size: 12px;">@displaySub</small></h6>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 11px;">
+                                                Liên hệ cá nhân
                                             </span>
                                         </div>
                                     </div>
                                     <span class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
-                                        Vào phòng <i class="bi bi-arrow-right-short ms-1"></i>
+                                        Nhắn tin <i class="bi bi-chat-dots ms-1"></i>
                                     </span>
                                 </a>
                             }
@@ -75,7 +80,6 @@
 </div>
 
 <style>
-    /* Hiệu ứng di chuột cho Sảnh chung mượt mà hơn */
     .bg-gradient:hover {
         transform: translateY(-2px);
         opacity: 0.95;

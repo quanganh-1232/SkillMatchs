@@ -8,17 +8,19 @@ namespace SkillMatch.Models
     {
         [Key]
         public int Id { get; set; }
-        public int? JobId { get; set; }
 
-        [ForeignKey("JobId")]
-        public virtual Job? Job { get; set; }
-
-        // 2. Định danh ID người gửi (Dùng string để khớp với Identity User Id của ASP.NET)
+        // 1. Người gửi
         [Required]
         public int SenderId { get; set; }
-        // Liên kết trực tiếp về lớp User quản lý tài khoản (hỗ trợ cả Client lẫn Student gửi tin)
+
         [ForeignKey("SenderId")]
         public virtual User? Sender { get; set; }
+
+        // 2. Người nhận (Để NULL nếu là tin nhắn gửi vào Sảnh chung - Global Lounge)
+        public int? ReceiverId { get; set; }
+
+        [ForeignKey("ReceiverId")]
+        public virtual User? Receiver { get; set; }
 
         // 3. Nội dung tin nhắn
         [Required(ErrorMessage = "Nội dung tin nhắn không được để trống")]

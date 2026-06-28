@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SkillMatch.Data;
 using SkillMatch.Hubs;
+using SkillMatch.Views.Services;
 
 namespace SkillMatch
 {
@@ -36,7 +37,7 @@ namespace SkillMatch
             builder.Services.AddHttpContextAccessor();
 
             // Đăng ký dịch vụ AI Gemini Client an toàn (Tránh Socket Exhaustion)
-            builder.Services.AddHttpClient<SkillMatch.Services.GeminiService>();
+            builder.Services.AddHttpClient<GeminiService>();
 
             var app = builder.Build();
 

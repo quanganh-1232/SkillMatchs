@@ -3,11 +3,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkillMatch.Data;
 using SkillMatch.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace SkillMatch.Controllers
 {
-    [Authorize(Roles = "Student")]
+    // BỎ [Authorize] ở đây để Client có thể vào xem Action Profile công khai
     public class StudentController : Controller
     {
         private readonly SkillMatchDbContext _context;
@@ -17,19 +21,37 @@ namespace SkillMatch.Controllers
             _context = context;
         }
 
-        // ==========================================
-        // 1. ACTION: HIỂN THỊ HỒ SƠ NĂNG LỰC ĐA TAB
-        // ==========================================
+        // ============================================================================
+        // 1. ACTION: XEM PROFILE CỦA CHÍNH MÌNH (CHỈ CHO SINH VIÊN ĐANG ĐĂNG NHẬP)
+        // ============================================================================
+        [Authorize(Roles = "Student")] // Chỉ cho phép sinh viên vào cấu hình/xem trang cá nhân của mình
         public async Task<IActionResult> Index()
         {
             var studentIdClaim = User.FindFirst("UserId")?.Value;
             if (studentIdClaim == null) return Challenge();
             int studentId = int.Parse(studentIdClaim);
 
-            var student = await _context.Users.FirstOrDefaultAsync(u => u.Id == studentId);
-            if (student == null) return NotFound();
+            return await GenerateProfileView(studentId, isOwnProfile: true);
+        }
 
-            // Giải mã chuỗi JSON từ trường Skills có sẵn trong DB
+        // ============================================================================
+        // 2. ACTION MỚI: XEM PROFILE CỦA SINH VIÊN BẤT KỲ (CHO CLIENT/GUEST ĐIỀU HƯỚNG SANG)
+        // ============================================================================
+        public async Task<IActionResult> Profile(int id)
+        {
+            // Tận dụng hàm chung để render dữ liệu profile dựa theo ID truyền từ trang chủ lên
+            return await GenerateProfileView(id, isOwnProfile: false);
+        }
+
+        /// <summary>
+        /// Hàm bổ trợ dùng chung để nạp và tính toán dữ liệu Profile nhằm tránh lặp code
+        /// </summary>
+        private async Task<IActionResult> GenerateProfileView(int studentId, bool isOwnProfile)
+        {
+            var student = await _context.Users.FirstOrDefaultAsync(u => u.Id == studentId);
+            if (student == null || student.Role != "Student") return NotFound();
+
+            // Giải mã chuỗi JSON từ trường Skills
             StudentProfileData profileData;
             try
             {
@@ -40,7 +62,6 @@ namespace SkillMatch.Controllers
                 profileData = new StudentProfileData();
             }
 
-            // Đảm bảo các thuộc tính không bị null để tránh lỗi ngoài View
             profileData.SkillList ??= new List<SkillProgress>();
             profileData.Services ??= new List<StudentService>();
             profileData.Portfolio ??= new List<PortfolioProject>();
@@ -49,7 +70,7 @@ namespace SkillMatch.Controllers
                 profileData.School = "Chưa cập nhật thông tin trường học";
             }
 
-            // Truy vấn danh sách đánh giá thực tế từ nhà tuyển dụng dựa trên các Job mà sinh viên đã ứng tuyển thành công
+            // Truy vấn đánh giá thực tế từ nhà tuyển dụng
             var feedbacks = await _context.Feedbacks
                 .Include(f => f.Job)
                 .Where(f => _context.Applications.Any(a => a.StudentId == studentId && a.JobId == f.JobId && a.Status == "Accepted"))
@@ -58,20 +79,20 @@ namespace SkillMatch.Controllers
 
             ViewBag.ProfileData = profileData;
             ViewBag.Feedbacks = feedbacks;
-
-            // Tính toán điểm đánh giá trung bình thực tế, nếu chưa có thì mặc định là 5.0
             ViewBag.AverageRating = feedbacks.Any() ? Math.Round(feedbacks.Average(f => f.Rating), 1) : 5.0;
+            ViewBag.IsOwnProfile = isOwnProfile; // Đánh dấu xem đây có phải chính chủ đang xem hay không
 
-            return View(student);
+            return View("Index", student); // Cả 2 action dùng chung giao diện Index.cshtml
         }
 
         // ==========================================
-        // 2. ACTION: XỬ LÝ LƯU CẬP NHẬT TẤT CẢ CÁC TAB
+        // 3. ACTION: XỬ LÝ LƯU CẬP NHẬT TẤT CẢ CÁC TAB
         // ==========================================
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> UpdateAdvancedProfile(
-            string fullName, string bio, string school, string avatarUrl, // ĐÃ BỔ SUNG: avatarUrl ở đây
+            string fullName, string bio, string school, string avatarUrl,
             string skillNames, string skillValues,
             string svcTitles, string svcPrices,
             string portTitles, string portImages)
@@ -83,11 +104,9 @@ namespace SkillMatch.Controllers
             var student = await _context.Users.FirstOrDefaultAsync(u => u.Id == studentId);
             if (student == null) return NotFound();
 
-            // Thực hiện cập nhật dữ liệu cốt lõi của User
             student.FullName = fullName;
-            student.Avatar = avatarUrl; // ĐÃ BỔ SUNG: Cập nhật đường dẫn ảnh trực tiếp vào thuộc tính của thực thể User
+            student.Avatar = avatarUrl;
 
-            // Lấy lại dữ liệu JSON cũ đang có trong DB để so sánh, giữ lại tương tác
             StudentProfileData oldProfile;
             try
             {
@@ -100,7 +119,6 @@ namespace SkillMatch.Controllers
             oldProfile.Services ??= new List<StudentService>();
             oldProfile.Portfolio ??= new List<PortfolioProject>();
 
-            // Chuyển danh sách cũ sang Dictionary để tìm kiếm nhanh theo Tên (Title)
             var oldServicesDict = oldProfile.Services
                 .Where(s => !string.IsNullOrWhiteSpace(s.Title))
                 .ToLookup(s => s.Title.Trim(), s => s)
@@ -111,7 +129,6 @@ namespace SkillMatch.Controllers
                 .ToLookup(p => p.Title.Trim(), p => p)
                 .ToDictionary(g => g.Key, g => g.First());
 
-            // Khởi tạo đối tượng lưu trữ mới
             var newProfileData = new StudentProfileData
             {
                 Bio = bio ?? "",
@@ -180,7 +197,6 @@ namespace SkillMatch.Controllers
                 }
             }
 
-            // Mã hóa đối tượng mới lại thành chuỗi JSON và cập nhật Database
             student.Skills = JsonSerializer.Serialize(newProfileData);
 
             _context.Update(student);
@@ -191,16 +207,15 @@ namespace SkillMatch.Controllers
         }
 
         // ============================================================================
-        // TÍNH NĂNG: QUẢN LÝ CÁC DỰ ÁN ĐÃ NHẬN / ĐÃ ỨNG TUYỂN
+        // 4. ACTION: QUẢN LÝ CÁC DỰ ÁN ĐÃ NHẬN / ĐÃ ỨNG TUYỂN
         // ============================================================================
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> MyApplications()
         {
-            // Lấy ID sinh viên đang đăng nhập từ hệ thống định danh Claims
             var studentIdClaim = User.FindFirst("UserId")?.Value;
             if (studentIdClaim == null) return Challenge();
             int studentId = int.Parse(studentIdClaim);
 
-            // Nạp danh sách Đơn ứng tuyển và nạp kèm (Include) thông tin Công việc liên quan
             var applications = await _context.Applications
                 .Include(a => a.Job)
                 .Where(a => a.StudentId == studentId)
@@ -212,6 +227,7 @@ namespace SkillMatch.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> CompleteJob(int applicationId, string productUrl)
         {
             if (string.IsNullOrWhiteSpace(productUrl))
@@ -230,20 +246,14 @@ namespace SkillMatch.Controllers
                 return RedirectToAction(nameof(MyApplications));
             }
 
-            // Kiểm tra xem đây là hành động nộp lần đầu hay nộp lại
             bool isReSubmit = !string.IsNullOrEmpty(application.ProductUrl);
-
-            // LƯU / CẬP NHẬT LINK BÀI LÀM CỦA SINH VIÊN
             application.ProductUrl = productUrl;
-
-            // CHUYỂN TRẠNG THÁI SANG: CHỜ KHÁCH HÀNG DUYỆT / NGHIỆM THU
             application.Job.Status = "PendingApproval";
 
             _context.Update(application);
             _context.Update(application.Job);
             await _context.SaveChangesAsync();
 
-            // Thay đổi thông báo dựa vào việc nộp mới hay nộp lại
             if (isReSubmit)
             {
                 TempData["SuccessMessage"] = $"Đã cập nhật lại sản phẩm cho dự án '{application.Job.Title}' thành công!";
