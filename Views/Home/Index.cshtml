@@ -1,116 +1,31 @@
-﻿@model IEnumerable<SkillMatch.Models.Job>
-
-@{
-    ViewData["Title"] = "SkillMatch - Nền tảng dự án & kết nối sinh viên tài năng";
-    var topStudents = ViewBag.TopStudents as List<SkillMatch.Models.User> ?? new List<SkillMatch.Models.User>();
+﻿@{
+    ViewData["Title"] = "SkillMatch - Nền tảng kết nối nhân sự & dự án tài năng";
+    bool isClientHome = ViewBag.IsClientHome ?? false;
+    string currentSearch = ViewBag.CurrentSearch ?? "";
+    
+    // Ép kiểu danh sách tường minh từ ViewBag để tránh lỗi Dynamic
+    var students = ViewBag.StudentsList as List<SkillMatch.Models.User> ?? new List<SkillMatch.Models.User>();
+    var jobs = ViewBag.JobsList as List<SkillMatch.Models.Job> ?? new List<SkillMatch.Models.Job>();
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/font/bootstrap-icons.min.css">
 
 <style>
-    body {
-        background-color: #f4f6f9;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .bg-skillmatch-hero {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        border-radius: 0 0 24px 24px;
-    }
-
-    .job-img-container {
-        position: relative;
-        height: 180px;
-        overflow: hidden;
-        border-radius: 12px 12px 0 0;
-        background-color: #eaedf2;
-    }
-
-        .job-img-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-    .job-card:hover .job-img-container img {
-        transform: scale(1.06);
-    }
-
-    .job-card {
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        border: none !important;
-        border-radius: 14px;
-        background: #ffffff;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        overflow: hidden;
-    }
-
-        .job-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0,0,0,0.08) !important;
-        }
-
-    .badge-featured {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        background-color: #ff6b00;
-        color: white;
-        font-weight: 700;
-        font-size: 11px;
-        padding: 5px 10px;
-        border-radius: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: 0 2px 8px rgba(255, 107, 0, 0.4);
-    }
-
-    .badge-delivery {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        background-color: rgba(0, 0, 0, 0.65);
-        color: white;
-        font-size: 11px;
-        padding: 5px 10px;
-        border-radius: 6px;
-        backdrop-filter: blur(4px);
-    }
-
-    .student-card {
-        border: none !important;
-        border-radius: 14px;
-        background: #ffffff;
-        transition: all 0.2s ease;
-    }
-
-        .student-card:hover {
-            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.08) !important;
-        }
-
-    .avatar-md {
-        width: 55px;
-        height: 55px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #e0e7ff;
-    }
-
-    .text-truncate-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .bg-cta-box {
-        background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
-        border-radius: 14px;
-    }
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .bg-skillmatch-hero { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: 0 0 24px 24px; }
+    .job-img-container { position: relative; height: 180px; overflow: hidden; border-radius: 12px 12px 0 0; background-color: #eaedf2; }
+    .job-img-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+    .job-card:hover .job-img-container img { transform: scale(1.06); }
+    .job-card { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border: none !important; border-radius: 14px; background: #ffffff; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+    .job-card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.08) !important; }
+    .badge-featured { position: absolute; top: 12px; left: 12px; background-color: #ff6b00; color: white; font-weight: 700; font-size: 11px; padding: 5px 10px; border-radius: 6px; text-transform: uppercase; box-shadow: 0 2px 8px rgba(255, 107, 0, 0.4); }
+    .badge-delivery { position: absolute; top: 12px; right: 12px; background-color: rgba(0, 0, 0, 0.65); color: white; font-size: 11px; padding: 5px 10px; border-radius: 6px; backdrop-filter: blur(4px); }
+    .student-card { border: none !important; border-radius: 14px; background: #ffffff; transition: all 0.2s ease; }
+    .student-card:hover { box-shadow: 0 8px 20px rgba(79, 70, 229, 0.08) !important; transform: translateY(-2px); }
+    .avatar-md { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e7ff; }
+    .avatar-lg { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 3px solid #e0e7ff; }
+    .text-truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
+    .bg-cta-box { background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%); border-radius: 14px; }
 </style>
 
 <div class="bg-skillmatch-hero text-white py-5 mb-5 shadow-sm">
@@ -118,27 +33,29 @@
         <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-2 mb-3 small fw-semibold">
             🚀 Nền tảng kết nối dự án thực tế #1 cho Sinh viên
         </span>
-        <h1 class="fw-bold mb-2 display-6">Kết nối tri thức - Khẳng định tài năng</h1>
+        <h1 class="fw-bold mb-2 display-6">
+            @(isClientHome ? "Tìm kiếm Nhân lực Sinh viên Chất lượng cao" : "Kết nối tri thức - Khẳng định tài năng")
+        </h1>
         <p class="text-white-50 mb-4 mx-auto" style="max-width: 600px; font-size: 15px;">
-            Hàng ngàn dự án hấp dẫn từ các doanh nghiệp đối tác đang chờ đợi kỹ năng của bạn.
+            @(isClientHome ? "Duyệt qua danh sách hồ sơ sinh viên tài năng phù hợp nhất với các dự án công nghệ của bạn." : "Hàng ngàn dự án hấp dẫn từ các doanh nghiệp đối tác đang chờ đợi kỹ năng của bạn.")
         </p>
 
         <div class="row justify-content-center">
             <div class="col-lg-9">
-                <div class="card p-2 border-0 shadow bg-white rounded-pill">
+                <form asp-controller="Home" asp-action="Index" method="get" class="card p-2 border-0 shadow bg-white rounded-pill">
                     <div class="d-flex align-items-center position-relative m-0 w-100">
                         <i class="bi bi-search position-absolute text-muted" style="left: 20px; font-size: 16px; pointer-events: none;"></i>
-                        <input type="text" id="live-search-input" class="form-control border-0 bg-transparent shadow-none" placeholder="Tìm theo kỹ năng hoặc từ khóa (ví dụ: figma, web)..." style="padding-left: 48px; padding-right: 20px; color: #334155; font-size: 14px;" />
-                        <div class="pe-1">
-                            @if (User.IsInRole("Client"))
-                            {
-                                <a asp-controller="Jobs" asp-action="Create" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm text-nowrap">
-                                    <i class="bi bi-plus-circle-fill me-1"></i> Đăng việc mới
-                                </a>
-                            }
+                        <input type="text" name="searchString" id="live-search-input" value="@currentSearch"
+                               class="form-control border-0 bg-transparent shadow-none" 
+                               placeholder="@(isClientHome ? "Tìm kiếm theo từ khóa kỹ năng, mô tả sinh viên (ví dụ: react, designer, nodejs)..." : "Tìm theo tên công việc hoặc từ khóa nội dung...")" 
+                               style="padding-left: 48px; padding-right: 120px; color: #334155; font-size: 14px;" />
+                        <div class="position-absolute pe-1" style="right: 5px;">
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold text-nowrap shadow-sm">
+                                Tìm kiếm
+                            </button>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -146,221 +63,292 @@
 
 <div class="container">
     <div class="row">
+        
         <div class="col-lg-8 mb-5 pe-lg-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h3 class="fw-bold text-dark mb-1"><i class="bi bi-grid-1x2-fill text-primary me-2"></i>Dự án đang tuyển dụng</h3>
-                    <p class="text-muted small mb-0">Các dự án công việc phù hợp với năng lực sinh viên</p>
-                </div>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold">
-                    🔥 <span id="job-count-badge">@(Model?.Count() ?? 0)</span> Dịch vụ khả dụng
-                </span>
-            </div>
-
-            <div id="job-list-container">
-                @if (Model == null || !Model.Any())
-                {
-                    <div class="card p-5 text-center border-0 shadow-sm rounded-4 bg-white w-100">
-                        <i class="bi bi-mailbox2 fs-1 text-muted mb-3"></i>
-                        <h5 class="fw-bold text-secondary">Chưa có dự án nào được đăng tải</h5>
-                        <p class="text-muted small">Hãy quay lại sau hoặc thử làm mới bộ lọc tìm kiếm nhé.</p>
+            
+            @if (isClientHome)
+            {
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-people-fill text-primary me-2"></i>Hồ sơ sinh viên sẵn có</h3>
+                        <p class="text-muted small mb-0">Danh sách nhân sự trẻ sẵn sàng nhận các gói công việc</p>
                     </div>
-                }
-                else
-                {
-                    <div class="row row-cols-1 row-cols-md-2 g-4">
-                        @foreach (var job in Model)
-                        {
-                            <div class="col">
-                                <div class="card job-card shadow-sm">
-                                    <div class="job-img-container">
-                                        <img src="@(string.IsNullOrEmpty(job.Thumbnail) ? "/images/default-thumbnail.jpg" : job.Thumbnail)"
-                                             alt="@job.Title"
-                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60';" />
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fw-semibold">
+                        ⭐ <span id="item-count-badge">@students.Count</span> Ứng viên khả dụng
+                    </span>
+                </div>
 
-                                        @if (job.IsFeatured)
-                                        {
-                                            <div class="badge-featured"><i class="bi bi-fire"></i> Nổi bật</div>
-                                        }
+                <div id="data-list-container">
+                    @if (!students.Any())
+                    {
+                        <div class="card p-5 text-center border-0 shadow-sm rounded-4 bg-white w-100">
+                            <i class="bi bi-person-x fs-1 text-muted mb-3"></i>
+                            <h5 class="fw-bold text-secondary">Không tìm thấy ứng viên nào phù hợp</h5>
+                            <p class="text-muted small">Hãy thử tìm kiếm lại bằng các từ khóa kỹ năng ngắn gọn hơn.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row row-cols-1 g-3">
+                            @foreach (var student in students)
+                            {
+                                <div class="col data-item-card">
+                                    <div class="card student-card p-4 shadow-sm bg-white">
+                                        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
+                                            <img src="@(string.IsNullOrEmpty(student.Avatar) ? $"https://api.dicebear.com/7.x/adventurer/svg?seed={Uri.EscapeDataString(student.FullName)}" : student.Avatar)"
+                                                 class="avatar-lg bg-light" alt="Avatar"
+                                                 onerror="this.onerror=null; this.src='https://api.dicebear.com/7.x/adventurer/svg?seed=SkillMatch';" />
 
-                                        @if (!string.IsNullOrEmpty(job.DeliveryTime))
-                                        {
-                                            <div class="badge-delivery"><i class="bi bi-lightning-auto"></i> @job.DeliveryTime</div>
-                                        }
-                                    </div>
-
-                                    <div class="card-body p-3 d-flex flex-column">
-                                        <div class="d-flex align-items-center gap-1 mb-2">
-                                            <span class="badge bg-light text-primary text-xs border border-primary-subtle">
-                                                <i class="bi bi-tag-fill me-1"></i>@(job.Category?.Name ?? "Dự án đối tác")
-                                            </span>
-                                        </div>
-
-                                        <h5 class="fw-bold fs-6 mb-2">
-                                            <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id" class="text-decoration-none text-dark hover-primary text-truncate-2">
-                                                @job.Title
-                                            </a>
-                                        </h5>
-
-                                        <p class="text-secondary small mb-3 text-truncate-2" style="font-size: 13px;">
-                                            @job.Description
-                                        </p>
-
-                                        <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
-                                            <div>
-                                                <small class="text-muted d-block" style="font-size: 10px; text-transform: uppercase;">Ngân sách</small>
-                                                <strong class="text-success fs-6 fw-bold">@job.Budget.ToString("N0") đ</strong>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted d-block text-end" style="font-size: 10px; text-transform: uppercase;">Hạn chót</small>
-                                                <span class="text-dark fw-semibold small" style="font-size: 12px;"><i class="bi bi-clock text-danger me-1"></i>@job.Deadline.ToString("dd/MM")</span>
+                                            <div class="flex-grow-1 w-100">
+                                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                                    <h5 class="fw-bold text-dark mb-0 item-title-text">
+                                                        @student.FullName
+                                                        @if (student.IsVerified)
+                                                        {
+                                                            <i class="bi bi-patch-check-fill text-primary ms-1" title="Tài khoản uy tín"></i>
+                                                        }
+                                                    </h5>
+                                                    <span class="badge bg-primary-subtle text-primary rounded-pill small fw-semibold">Sinh viên</span>
+                                                </div>
+                                                <p class="text-primary small mb-2 fw-medium"><i class="bi bi-envelope me-1"></i>@student.Email</p>
+                                                
+                                                <p class="text-secondary small mb-0 text-truncate-2 item-desc-text" style="font-size: 13.5px; line-height: 1.6;">
+                                                    @(string.IsNullOrEmpty(student.Bio) ? "Chưa cập nhật thông tin giới thiệu bản thân." : student.Bio)
+                                                </p>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="card-footer bg-transparent border-0 p-3 pt-0">
-                                        <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id" class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-bold">
-                                            Xem chi tiết & Ứng tuyển
-                                        </a>
+                                        <div class="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
+                                            <a href="mailto:@student.Email" class="btn btn-sm btn-outline-secondary rounded-pill px-3"><i class="bi bi-chat-dots me-1"></i> Gửi Email</a>
+                                            <a asp-controller="Jobs" asp-action="Manage" class="btn btn-sm btn-primary rounded-pill px-3"><i class="bi bi-briefcase me-1"></i> Mời vào dự án của bạn</a>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        }
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-grid-1x2-fill text-primary me-2"></i>Dự án đang tuyển dụng</h3>
+                        <p class="text-muted small mb-0">Các dự án công việc phù hợp với năng lực sinh viên</p>
                     </div>
-                }
-            </div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold">
+                        🔥 <span id="item-count-badge">@jobs.Count</span> Việc làm mở cửa
+                    </span>
+                </div>
+
+                <div id="data-list-container">
+                    @if (!jobs.Any())
+                    {
+                        <div class="card p-5 text-center border-0 shadow-sm rounded-4 bg-white w-100">
+                            <i class="bi bi-mailbox2 fs-1 text-muted mb-3"></i>
+                            <h5 class="fw-bold text-secondary">Chưa có dự án nào khớp với bộ lọc kiếm tìm</h5>
+                            <p class="text-muted small">Hãy quay lại sau hoặc thử làm mới từ khóa nhé.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            @foreach (var job in jobs)
+                            {
+                                <div class="col data-item-card">
+                                    <div class="card job-card shadow-sm">
+                                        <div class="job-img-container">
+                                            <img src="@(string.IsNullOrEmpty(job.Thumbnail) ? "/images/default-thumbnail.jpg" : job.Thumbnail)"
+                                                 alt="@job.Title"
+                                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60';" />
+
+                                            @if (job.IsFeatured)
+                                            {
+                                                <div class="badge-featured"><i class="bi bi-fire"></i> Nổi bật</div>
+                                            }
+
+                                            @if (!string.IsNullOrEmpty(job.DeliveryTime))
+                                            {
+                                                <div class="badge-delivery"><i class="bi bi-lightning-auto"></i> @job.DeliveryTime</div>
+                                            }
+                                        </div>
+
+                                        <div class="card-body p-3 d-flex flex-column">
+                                            <div class="mb-2">
+                                                <span class="badge bg-light text-primary border border-primary-subtle">
+                                                    <i class="bi bi-tag-fill me-1"></i>@(job.Category?.Name ?? "Dự án đối tác")
+                                                </span>
+                                            </div>
+
+                                            <h5 class="fw-bold fs-6 mb-2">
+                                                <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id" class="text-decoration-none text-dark hover-primary text-truncate-2 item-title-text">
+                                                    @job.Title
+                                                </a>
+                                            </h5>
+
+                                            <p class="text-secondary small mb-3 text-truncate-2 item-desc-text" style="font-size: 13px;">
+                                                @job.Description
+                                            </p>
+
+                                            <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                                                <div>
+                                                    <small class="text-muted d-block" style="font-size: 10px; text-transform: uppercase;">Ngân sách</small>
+                                                    <strong class="text-success fs-6 fw-bold">@job.Budget.ToString("N0") đ</strong>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted d-block text-end" style="font-size: 10px; text-transform: uppercase;">Hạn chót</small>
+                                                    <span class="text-dark fw-semibold small" style="font-size: 12px;"><i class="bi bi-clock text-danger me-1"></i>@job.Deadline.ToString("dd/MM")</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-footer bg-transparent border-0 p-3 pt-0">
+                                            <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id" class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-bold">
+                                                Xem chi tiết & Ứng tuyển
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
         </div>
 
         <div class="col-lg-4 mb-5">
             @if (User.IsInRole("Client"))
             {
                 <div class="card bg-cta-box text-white p-4 border-0 shadow-sm mb-4">
-                    <h5 class="fw-bold mb-1"><i class="bi bi-lightning-fill text-warning me-1"></i>Bạn muốn tuyển nhân sự?</h5>
-                    <p class="text-white-50 small mb-3">Đăng ngay các yêu cầu công việc, bài tập lớn để tiếp cận nguồn lực đối tác chất lượng cao.</p>
-                    <a asp-controller="Jobs" asp-action="Create" class="btn btn-white bg-white text-primary fw-bold w-100 rounded-pill py-2 shadow-sm text-center text-decoration-none">
-                        <i class="bi bi-plus-lg me-1"></i> Đăng một dự án mới
+                    <h5 class="fw-bold mb-1"><i class="bi bi-lightning-fill text-warning me-1"></i>Yêu cầu nhân sự gấp?</h5>
+                    <p class="text-white-50 small mb-3">Đăng tin tuyển dụng và thiết lập ngân sách dự án ngay để hệ thống tự động gợi ý hồ sơ sinh viên phù hợp.</p>
+                    <a asp-controller="Jobs" asp-action="Create" class="btn bg-white text-primary fw-bold w-100 rounded-pill py-2 shadow-sm text-center text-decoration-none">
+                        <i class="bi bi-plus-lg me-1"></i> Tạo một tin dự án mới
                     </a>
                 </div>
             }
 
-            <div class="mb-4">
-                <h4 class="fw-bold text-dark mb-1"><i class="bi bi-star-fill text-warning me-2"></i>Sinh viên tiêu biểu</h4>
-                <p class="text-muted small mb-0">Các gương mặt nhận dự án xuất sắc</p>
-            </div>
-
-            @if (!topStudents.Any())
-            {
-                <div class="card p-4 text-center border-0 shadow-sm bg-white rounded-3">
-                    <p class="text-muted small mb-0">Dữ liệu sinh viên xuất sắc đang được cập nhật thêm.</p>
-                </div>
-            }
-            else
-            {
-                <div class="d-flex flex-column gap-3">
-                    @foreach (var student in topStudents)
-                    {
-                        <div class="card student-card p-3 shadow-sm bg-white">
-                            <div class="d-flex align-items-center gap-3">
-                                <img src="@(string.IsNullOrEmpty(student.Avatar) ? $"https://api.dicebear.com/7.x/adventurer/svg?seed={student.FullName}" : student.Avatar)"
-                                     class="avatar-md bg-light"
-                                     alt="Avatar của @student.FullName"
-                                     onerror="this.onerror=null; this.src='https://api.dicebear.com/7.x/adventurer/svg?seed=SkillMatch';" />
-
-                                <div class="flex-grow-1">
-                                    <h6 class="fw-bold text-dark mb-0">
-                                        <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-dark hover-primary fw-bold">
-                                            @student.FullName
-                                        </a>
-                                        @if (student.IsVerified)
-                                        {
-                                            <i class="bi bi-patch-check-fill text-primary ms-1" title="Tài khoản uy tín"></i>
-                                        }
-                                    </h6>
-                                    <small class="text-muted d-block mb-1 text-truncate" style="max-width: 200px;">
-                                        @(string.IsNullOrEmpty(student.Bio) ? $"📧 {student.Email}" : student.Bio)
-                                    </small>
-                                    <div class="d-flex align-items-center gap-1.5 mt-1">
-                                        <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1" style="font-size: 11px;">
-                                            🏆 Tài năng uy tín
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-
-            <div class="card border-0 shadow-sm p-4 bg-white rounded-4 mt-4">
-                <h5 class="fw-bold text-dark mb-3">🛠️ Quy trình làm việc</h5>
+            <div class="card border-0 shadow-sm p-4 bg-white rounded-4 mb-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-success me-2"></i>Quy trình SkillMatch</h5>
                 <div class="d-flex flex-column gap-3 small text-secondary">
                     <div class="d-flex gap-2">
                         <i class="bi bi-1-circle-fill text-primary fs-5"></i>
-                        <div><strong>Ứng tuyển nhanh chóng:</strong> Sinh viên nộp giới thiệu bản thân trực tiếp vào bài đăng việc làm.</div>
+                        <div><strong>Đăng tin / Duyệt hồ sơ:</strong> Khách đăng việc, duyệt sinh viên hoặc chủ động liên hệ tài năng trước.</div>
                     </div>
                     <div class="d-flex gap-2">
                         <i class="bi bi-2-circle-fill text-primary fs-5"></i>
-                        <div><strong>Nhận việc & Triển khai:</strong> Khách hàng phê duyệt hồ sơ và giao dự án chạy thực tế.</div>
+                        <div><strong>Triển khai công việc:</strong> Kết nối qua hệ thống, thực hiện dự án bám sát mốc tiến độ đặt ra.</div>
                     </div>
                     <div class="d-flex gap-2">
                         <i class="bi bi-3-circle-fill text-primary fs-5"></i>
-                        <div><strong>Báo cáo nghiệm thu:</strong> Gửi link kết quả (GitHub, Drive...) để khách hàng kiểm tra tất toán.</div>
+                        <div><strong>Nghiệm thu an toàn:</strong> Khách kiểm tra sản phẩm hoàn thiện, đánh giá số sao năng lực uy tín.</div>
                     </div>
                 </div>
             </div>
+
+            @if (isClientHome)
+            {
+                var featuredFaces = ViewBag.FeaturedFaces as List<SkillMatch.Models.User>;
+                if (featuredFaces != null && featuredFaces.Any())
+                {
+                    <div class="mb-3">
+                        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-star-fill text-warning me-2"></i>Gương mặt xuất sắc</h5>
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        @foreach (var student in featuredFaces)
+                        {
+                            <div class="card p-2 border-0 shadow-sm rounded-3 bg-white">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=@(Uri.EscapeDataString(student.FullName))" class="rounded-circle bg-light" style="width:35px;height:35px;" alt="" />
+                                    <div class="text-truncate">
+                                        <small class="fw-bold d-block text-dark text-truncate">@student.FullName</small>
+                                        <span class="text-muted" style="font-size:11px;">🏆 Gương mặt tiêu biểu</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                var topClients = ViewBag.TopClients as List<SkillMatch.Controllers.TopClientViewModel>;
+                if (topClients != null && topClients.Any())
+                {
+                    <div class="mb-3">
+                        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-fire text-danger me-2"></i>Khách hàng tiềm năng</h5>
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        @foreach (var client in topClients)
+                        {
+                            <div class="card p-2 border-0 shadow-sm rounded-3 bg-white">
+                                <div class="d-flex align-items-center justify-content-between gap-2">
+                                    <div class="d-flex align-items-center gap-2 text-truncate">
+                                        <img src="https://api.dicebear.com/7.x/identicon/svg?seed=@(Uri.EscapeDataString(client.FullName))" class="rounded-3 bg-light" style="width:35px;height:35px;" alt="" />
+                                        <div class="text-truncate">
+                                            <small class="fw-bold d-block text-dark text-truncate">@client.FullName</small>
+                                            <span class="text-muted" style="font-size:11px;">💼 Đối tác uy tín</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success rounded-pill small fw-bold text-nowrap">
+                                        @client.JobCount bài đăng
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
         </div>
+
     </div>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("live-search-input");
-        const listContainer = document.getElementById("job-list-container");
-        const countBadge = document.getElementById("job-count-badge");
+        const listContainer = document.getElementById("data-list-container");
+        const countBadge = document.getElementById("item-count-badge");
 
-        // Lưu trữ danh sách card thô ban đầu phục vụ việc lọc tức thì tại Client cực mượt
         if (searchInput && listContainer) {
-            const allJobCards = Array.from(listContainer.querySelectorAll(".col"));
+            const allItems = Array.from(listContainer.querySelectorAll(".data-item-card"));
 
             searchInput.addEventListener("input", function () {
                 const keyword = this.value.trim().toLowerCase();
                 let visibleCount = 0;
 
-                // Nếu ô nhập trống rỗng, khôi phục lại toàn bộ danh sách ban đầu
                 if (keyword === "") {
-                    allJobCards.forEach(card => card.style.display = "block");
-                    if (countBadge) countBadge.innerText = allJobCards.length;
+                    allItems.forEach(item => item.style.display = "block");
+                    if (countBadge) countBadge.innerText = allItems.length;
+                    
+                    const existNoResultMsg = document.getElementById("live-search-empty");
+                    if (existNoResultMsg) existNoResultMsg.remove();
                     return;
                 }
 
-                // Duyệt qua từng Card dự án hiện có trên màn hình để kiểm tra từ khóa
-                allJobCards.forEach(card => {
-                    const title = card.querySelector("h5")?.innerText.toLowerCase() || "";
-                    const desc = card.querySelector("p")?.innerText.toLowerCase() || "";
-                    const catBadge = card.querySelector(".badge")?.innerText.toLowerCase() || "";
-
-                    if (title.includes(keyword) || desc.includes(keyword) || catBadge.includes(keyword)) {
-                        card.style.display = "block";
+                allItems.forEach(item => {
+                    const title = item.querySelector(".item-title-text")?.innerText.toLowerCase() || "";
+                    const desc = item.querySelector(".item-desc-text")?.innerText.toLowerCase() || "";
+                    
+                    if (title.includes(keyword) || desc.includes(keyword)) {
+                        item.style.display = "block";
                         visibleCount++;
                     } else {
-                        card.style.display = "none";
+                        item.style.display = "none";
                     }
                 });
 
-                // Đồng bộ số lượng công việc lọc được lên Badge đếm kết quả
                 if (countBadge) countBadge.innerText = visibleCount;
 
-                // Xử lý giao diện trường hợp bộ lọc không tìm ra kết quả nào khớp
                 const existNoResultMsg = document.getElementById("live-search-empty");
                 if (visibleCount === 0) {
                     if (!existNoResultMsg) {
                         const emptyDiv = document.createElement("div");
                         emptyDiv.id = "live-search-empty";
-                        emptyDiv.className = "card p-5 text-center border-0 shadow-sm rounded-4 bg-white w-100 my-3";
+                        emptyDiv.className = "card p-5 text-center border-0 shadow-sm rounded-4 bg-white w-100 my-2";
                         emptyDiv.innerHTML = `
-                            <i class="bi bi-folder-x fs-1 text-muted mb-3"></i>
-                            <h5 class="fw-bold text-secondary">Không tìm thấy dự án nào khớp</h5>
-                            <p class="text-muted small">Thử tìm kiếm bằng một từ khóa hoặc kỹ năng khác xem sao nhé.</p>`;
+                            <i class="bi bi-search-heart fs-1 text-muted mb-3"></i>
+                            <h5 class="fw-bold text-secondary">Không tìm thấy bản ghi nào khớp</h5>
+                            <p class="text-muted small">Hãy đổi từ khóa khác xem sao nhé.</p>`;
                         listContainer.appendChild(emptyDiv);
                     }
                 } else {
@@ -368,15 +356,5 @@
                 }
             });
         }
-
-        // Logic danh mục tag nhanh
-        const tags = document.querySelectorAll('.btn-tag');
-        tags.forEach(tag => {
-            tag.addEventListener('click', function(e) {
-                e.preventDefault();
-                tags.forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
     });
 </script>

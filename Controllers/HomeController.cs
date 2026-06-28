@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SkillMatch.Data;
 using SkillMatch.Models;
+using System.Collections.Generic;
 
 namespace SkillMatch.Controllers
 {
@@ -22,33 +24,92 @@ namespace SkillMatch.Controllers
 
         public async Task<IActionResult> Index(string searchString)
         {
-            // 1. Sửa điều kiện Status từ "Active" thành "Open" để khớp với Database mẫu công việc đang mở tuyển
-            var jobsQuery = _context.Jobs.Include(j => j.Category).Where(j => j.Status == "Open");
+            bool isClient = User.IsInRole("Client");
+            ViewBag.IsClientHome = isClient;
+            ViewBag.CurrentSearch = searchString;
 
-            // 2. Logic tìm kiếm theo từ khóa (giữ nguyên)
-            if (!string.IsNullOrEmpty(searchString))
+            if (isClient)
             {
-                jobsQuery = jobsQuery.Where(j => j.Title.Contains(searchString)
-                                              || j.Description.Contains(searchString));
+                // ----------------------------------------------------
+                // LOGIC CHO CLIENT (XEM DANH SÁCH SINH VIÊN)
+                // ----------------------------------------------------
+                var studentsQuery = _context.Users.Where(u => u.Role == "Student");
+
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    string keyword = searchString.ToLower();
+                    studentsQuery = studentsQuery.Where(u =>
+                        (u.FullName != null && u.FullName.ToLower().Contains(keyword)) ||
+                        (u.Bio != null && u.Bio.ToLower().Contains(keyword)) ||
+                        (u.Email != null && u.Email.ToLower().Contains(keyword))
+                    );
+                }
+
+                var students = await studentsQuery.OrderByDescending(u => u.IsVerified).ToListAsync();
+                ViewBag.StudentsList = students;
+
+                // Cột phải hiển thị: Gương mặt xuất sắc (Sinh viên có IsVerified == true)
+                ViewBag.FeaturedFaces = await _context.Users
+                    .Where(u => u.Role == "Student" && u.IsVerified == true)
+                    .Take(4)
+                    .ToListAsync();
+            }
+            else
+            {
+                // ----------------------------------------------------
+                // LOGIC CHO STUDENT / GUEST (XEM DANH SÁCH JOBS)
+                // ----------------------------------------------------
+                var jobsQuery = _context.Jobs.Include(j => j.Category).Where(j => j.Status == "Open");
+
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    string keyword = searchString.ToLower();
+                    jobsQuery = jobsQuery.Where(j =>
+                        (j.Title != null && j.Title.ToLower().Contains(keyword)) ||
+                        (j.Description != null && j.Description.ToLower().Contains(keyword))
+                    );
+                }
+
+                var activeJobs = await jobsQuery
+                    .OrderByDescending(j => j.IsFeatured)
+                    .ThenByDescending(j => j.CreatedAt)
+                    .ToListAsync();
+                ViewBag.JobsList = activeJobs;
+
+                // XỬ LÝ LỖI GROUP BY TRÊN LINQ EF CORE: Tải danh sách thô về RAM trước (AsEnumerable) sau đó mới GroupBy
+                var rawJobsData = await _context.Jobs
+                    .Select(j => new { j.ClientId })
+                    .ToListAsync();
+
+                var topClientsData = rawJobsData
+                    .GroupBy(j => j.ClientId)
+                    .Select(g => new { ClientId = g.Key, JobCount = g.Count() })
+                    .OrderByDescending(x => x.JobCount)
+                    .Take(4)
+                    .ToList();
+
+                var clientIds = topClientsData.Select(x => x.ClientId).ToList();
+                var rawClients = await _context.Users
+                    .Where(u => clientIds.Contains(u.Id))
+                    .ToListAsync();
+
+                var topClients = topClientsData
+                    .Select(tc => {
+                        var client = rawClients.FirstOrDefault(c => c.Id == tc.ClientId);
+                        return new TopClientViewModel
+                        {
+                            FullName = client?.FullName ?? "Đối tác hệ thống",
+                            Email = client?.Email ?? "",
+                            JobCount = tc.JobCount
+                        };
+                    })
+                    .Where(x => !string.IsNullOrEmpty(x.Email))
+                    .ToList();
+
+                ViewBag.TopClients = topClients;
             }
 
-            // 3. Sắp xếp: Ưu tiên công việc NỔI BẬT (IsFeatured) lên trước
-            var activeJobs = await jobsQuery
-                .OrderByDescending(j => j.IsFeatured)
-                .ThenByDescending(j => j.CreatedAt)
-                .ToListAsync();
-
-            // 4. BỔ SUNG: Kéo danh sách Sinh viên tiêu biểu (IsVerified == true) từ Database lên trang chủ
-            var topStudents = await _context.Users
-                .Where(u => u.Role == "Student" && u.IsVerified == true)
-                .Take(4) // Lấy tối đa 4 sinh viên xuất sắc nhất hiển thị sidebar
-                .ToListAsync();
-
-            // Đẩy danh sách sinh viên vào ViewBag để file Index.cshtml bóc tách ra
-            ViewBag.TopStudents = topStudents;
-
-            // Trả danh sách Job về làm Model chính của trang chủ
-            return View(activeJobs);
+            return View();
         }
 
         public IActionResult Privacy()
@@ -61,5 +122,13 @@ namespace SkillMatch.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+    }
+
+    // Định nghĩa class ViewModel nằm ngoài class HomeController đúng chuẩn C#
+    public class TopClientViewModel
+    {
+        public string FullName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public int JobCount { get; set; }
     }
 }

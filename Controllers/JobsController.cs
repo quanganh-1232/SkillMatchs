@@ -61,7 +61,7 @@ namespace SkillMatch.Controllers
             ViewBag.ClientName = client?.FullName ?? "Nhà tuyển dụng ẩn danh";
 
             // --- ĐOẠN BỔ SUNG: Kiểm tra trạng thái đóng/mở thực tế để ép giao diện hiển thị đúng ---
-            bool isExpired = job.Deadline < DateTime.Now;
+            bool isExpired = job.Deadline.Date < DateTime.Today;
 
             // Nếu bạn muốn "Bypass" luôn mở nút khi test, hãy đổi dòng trên thành: bool isExpired = false;
 
@@ -177,7 +177,7 @@ namespace SkillMatch.Controllers
                     job.ClientId = int.Parse(clientIdClaim);
                 }
 
-                job.Status = "Active"; // Mặc định trạng thái ban đầu là Active để sinh viên tìm thấy
+                job.Status = "open"; // Mặc định trạng thái ban đầu là Active để sinh viên tìm thấy
                 job.CreatedAt = DateTime.Now;
 
                 _context.Add(job);
